@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load carrito_extras %}
+{% load moneda %}
+
+{% block title %}Carrito de Compras - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🛒 Tu carrito de pedidos</h2>
+
+  {% if request.session.carrito %}
+    <div class="table-responsive">
+      <table class="table align-middle shadow-sm">
+        <thead style="background-color:#ff8c42; color:white;">
+          <tr>
+            <th>Producto</th>
+            <th class="text-center">Precio</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-end">Subtotal</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, item in request.session.carrito.items %}
+          <tr>
+            <td>{{ item.nombre }}</td>
+            <td class="text-center">{{ item.precio|floatformat:2|moneda }}</td>
+            <td class="text-center">
+              <div class="d-inline-flex align-items-center gap-2">
+                <a href="{% url 'carrito:restar_producto' item.producto_id %}" class="btn btn-sm btn-outline-secondary">-</a>
+                <span class="mx-1 fw-semibold">{{ item.cantidad }}</span>
+                <a href="{% url 'carrito:agregar_al_carrito' item.producto_id %}" class="btn btn-sm btn-outline-secondary">+</a>
+              </div>
+            </td>
+            <td class="text-end">{{ item.cantidad|multiply:item.precio|floatformat:2|moneda }}</td>
+            <td class="text-center">
+              <a href="{% url 'carrito:eliminar_producto' key %}" class="btn btn-sm btn-danger">🗑️</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3" class="text-end">Total:</th>
+            <th class="text-end" style="color:#5a2a00;">{{ request.session.carrito|get_total_carrito|floatformat:2|moneda }}</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
+      <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-secondary">Seguir Ordenando</a>
+      <button type="button" id="btnVaciar" class="btn btn-outline-danger">
+  Vaciar Carrito
+</button>
+      <a href="{% url 'carrito:checkout' %}" class="btn text-white" style="background-color:#ff8c42;">Realizar pedido</a>
+    </div>
+
+  {% else %}
+    <div class="text-center mt-5">
+      <h4 class="text-muted">Tu carrito está vacío 😢</h4>
+      <a href="{% url 'tienda:tienda' %}" class="btn mt-3" style="background-color:#ff8c42; color:white;">Ir la tienda</a>
+    </div>
+  {% endif %}
+</section>
+<script>
+document.getElementById("btnVaciar").addEventListener("click", async () => {
+  const res = await fetch("{% url 'carrito:limpiar_carrito' %}", {
+    headers: {'X-Requested-With': 'XMLHttpRequest'}
+  });
+
+  // ✅ Si vacío correctamente → mostrar vista carrito vacío sin salir del carrito
+  if(res.ok){
+    window.location.href = "{% url 'carrito:ver_carrito' %}";
+  }
+});
+</script>
+{% endblock %}

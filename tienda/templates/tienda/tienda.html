@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load moneda %}
+
+{% block title %}Tienda - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🧁 Nuestros productos</h2>
+
+  {% if productos %}
+  <div class="row">
+    {% for producto in productos %}
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+
+        {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+        {% endif %}
+
+        <div class="card-body text-center">
+          <h5 class="card-title fw-bold">{{ producto.nombre }}</h5>
+          <p class="card-text">{{ producto.descripcion|truncatechars:100 }}</p>
+          <p class="fw-bold" style="color:#5a2a00;">{{ producto.precio|moneda }}</p>
+
+          <div class="carrito-acciones"
+            data-id="{{ producto.id }}"
+            data-url-add="{% url 'carrito:agregar_al_carrito' producto.id %}"
+            data-url-sub="{% url 'carrito:restar_producto' producto.id %}"
+            data-url-del="{% url 'carrito:eliminar_producto' producto.id %}"
+            data-cantidad="{{ producto.cant_en_carrito }}">
+            
+            {% if producto.cant_en_carrito > 0 %}
+            <!-- El JS pintará el control completo -->
+            {% else %}
+            <button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p class="text-center text-muted mt-4">No hay productos disponibles por el momento.</p>
+  {% endif %}
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const $$ = s => document.querySelectorAll(s);
+
+  // ✅ Actualizar badge global del carrito
+  async function refreshCounter() {
+    try {
+      const res = await fetch("{% url 'carrito:cantidad_carrito' %}");
+      const data = await res.json();
+      const badge = document.getElementById("contadorCarrito");
+
+      if (!badge) return;
+      badge.style.display = data.cantidad > 0 ? "inline-block" : "none";
+      badge.textContent = data.cantidad;
+    } catch (e) {
+      console.error("Error contador:", e);
+    }
+  }
+
+  // ✅ Toast "Añadido al carrito"
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast-msg";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  async function hit(url) {
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+    // 🔔 Notificar a TODO el sistema que el carrito cambió
+    window.dispatchEvent(new Event("carrito-actualizado"));
+
+    return res;
+  }
+
+  function pintarControles(zone, cant) {
+    zone.innerHTML = `
+      <div class="d-flex justify-content-center align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-restar">-</button>
+        <input type="number" min="1" class="form-control cant-input text-center"
+               value="${cant}" style="width:70px;">
+        <button class="btn btn-outline-secondary btn-sumar">+</button>
+        <button class="btn btn-danger btn-borrar">🗑</button>
+      </div>
+      <p class="text-muted small mt-1">En carrito: <span class="cant-label">${cant}</span></p>
+    `;
+    activarEventos(zone);
+    refreshCounter();
+  }
+
+  function activarEventos(zone) {
+    const urlAdd = zone.dataset.urlAdd;
+    const urlSub = zone.dataset.urlSub;
+    const urlDel = zone.dataset.urlDel;
+
+    const btnAgregar = zone.querySelector(".btn-agregar");
+    const btnSum = zone.querySelector(".btn-sumar");
+    const btnRes = zone.querySelector(".btn-restar");
+    const btnDel = zone.querySelector(".btn-borrar");
+    const input = zone.querySelector(".cant-input");
+    const label = zone.querySelector(".cant-label");
+
+    if (btnAgregar) {
+      btnAgregar.onclick = async e => {
+        e.preventDefault();
+        e.stopPropagation();
+        await hit(urlAdd);
+
+        pintarControles(zone, 1);
+        showToast("✅ Producto añadido al carrito");
+      };
+    }
+
+    if (btnSum) {
+      btnSum.onclick = async () => {
+        await hit(urlAdd);
+        const nueva = +input.value + 1;
+        input.value = nueva;
+        label.textContent = nueva;
+        refreshCounter();
+      };
+    }
+
+    if (btnRes) {
+      btnRes.onclick = async () => {
+        if (+input.value <= 1) {
+          await hit(urlDel);
+          zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
+          activarEventos(zone);
+          refreshCounter();
+        } else {
+          await hit(urlSub);
+          const nueva = +input.value - 1;
+          input.value = nueva;
+          label.textContent = nueva;
+          refreshCounter();
+        }
+      };
+    }
+
+    if (btnDel) {
+      btnDel.onclick = async () => {
+        await hit(urlDel);
+        zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
+        activarEventos(zone);
+        refreshCounter();
+      };
+    }
+
+    // ✅ NUEVO: Evento para cuando el usuario escribe en el input
+    if (input) {
+      let timeoutId;
+      
+      input.addEventListener('input', (e) => {
+        clearTimeout(timeoutId);
+        
+        // Usar timeout para no hacer muchas peticiones mientras el usuario escribe
+        timeoutId = setTimeout(async () => {
+          const nuevaCantidad = parseInt(input.value);
+          
+          // Validar que sea un número válido y mayor a 0
+          if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+            // Si no es válido, restaurar el valor anterior
+            input.value = zone.dataset.cantidad;
+            return;
+          }
+          
+          const cantidadActual = parseInt(zone.dataset.cantidad);
+          
+          if (nuevaCantidad > cantidadActual) {
+            // Si aumentó la cantidad, agregar la diferencia
+            const diferencia = nuevaCantidad - cantidadActual;
+            for (let i = 0; i < diferencia; i++) {
+              await hit(urlAdd);
+            }
+          } else if (nuevaCantidad < cantidadActual) {
+            // Si disminuyó la cantidad, restar la diferencia
+            const diferencia = cantidadActual - nuevaCantidad;
+            for (let i = 0; i < diferencia; i++) {
+              await hit(urlSub);
+            }
+          }
+          
+          // Actualizar el dataset y el label
+          zone.dataset.cantidad = nuevaCantidad;
+          if (label) {
+            label.textContent = nuevaCantidad;
+          }
+          
+          refreshCounter();
+          showToast("✅ Cantidad actualizada");
+          
+        }, 500); // Esperar 500ms después de que el usuario deje de escribir
+      });
+
+      // También actualizar cuando el input pierde el foco
+      input.addEventListener('blur', (e) => {
+        const nuevaCantidad = parseInt(input.value);
+        
+        if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+          input.value = 1;
+          zone.dataset.cantidad = 1;
+          if (label) {
+            label.textContent = 1;
+          }
+        }
+      });
+    }
+  }
+
+  $$(`.carrito-acciones`).forEach(zone => {
+    const cant = Number(zone.dataset.cantidad);
+    cant > 0 ? pintarControles(zone, cant) : activarEventos(zone);
+  });
+
+});
+</script>
+
+
+<style>
+.toast-msg {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff8c42;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  animation: toastAnim 2.5s forwards;
+}
+
+@keyframes toastAnim {
+  0% { opacity: 0; transform: translateY(15px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(15px); }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.titulo }} - Blog Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold" style="color:#5a2a00;">{{ post.titulo }}</h2>
+        <p class="text-muted small">Por {{ post.autor }} — {{ post.created|date:"d M Y" }}</p>
+    </div>
+
+    {% if post.imagen %}
+    <div class="text-center mb-4">
+        <img src="{{ post.imagen.url }}" alt="{{ post.titulo }}" class="img-fluid rounded shadow"
+            style="max-height:400px; object-fit:cover;">
+    </div>
+    {% endif %}
+
+    <div class="col-lg-8 mx-auto">
+        <p class="lead text-muted" style="line-height:1.8;">{{ post.contenido|linebreaks }}</p>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'blog' %}" class="btn btn-outline-secondary px-4 py-2">⬅ Volver al blog</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

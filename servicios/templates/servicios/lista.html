@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Servicios{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h2 class="mb-4">Nuestros Servicios</h2>
+  <div class="row">
+    {% for s in servicios %}
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          {% if s.imagen %}<img src="{{ s.imagen.url }}" class="card-img-top" alt="{{ s.titulo }}">{% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ s.titulo }}</h5>
+            <p class="card-text">{{ s.descripcion|truncatechars:120 }}</p>
+            <a class="btn btn-primary" href="{% url 'servicios:detalle' s.slug %}" style="background-color: #ff8c42; border: none;">Ver detalles</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No hay servicios disponibles.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

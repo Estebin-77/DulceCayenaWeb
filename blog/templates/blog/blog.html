@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blog - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+    <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🧁 Blog Dulce Cayena</h2>
+
+    <div class="row g-4">
+        {% for post in posts %}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                {% if post.imagen %}
+                <img src="{{ post.imagen.url }}" class="card-img-top" alt="{{ post.titulo }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title" style="color:#5a2a00;">{{ post.titulo }}</h5>
+                    <p class="card-text text-muted small">{{ post.contenido|truncatewords:25 }}</p>
+                    <a href="{% url 'post_detalle' post.slug %}" class="btn btn-outline-success btn-sm">Leer más</a>
+                </div>
+                <div class="card-footer text-muted text-end small">
+                    {{ post.created|date:"d M Y" }} — {{ post.autor }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No hay publicaciones por el momento.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+    .card {
+        border-radius: 15px;
+        background-color: #fff7f2;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 18px rgba(90, 42, 0, 0.15);
+    }
+</style>
+{% endblock %}

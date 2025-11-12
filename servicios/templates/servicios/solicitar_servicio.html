@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Solicitar Servicio - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🎂 Solicitar un servicio</h2>
+
+  <form method="post" class="mx-auto p-4 shadow rounded bg-white" style="max-width:600px;">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label class="form-label">{{ form.nombre.label }}</label>
+      {{ form.nombre }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.email.label }}</label>
+      {{ form.email }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.telefono.label }}</label>
+      {{ form.telefono }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.tipo_servicio.label }}</label>
+      {{ form.tipo_servicio }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.fecha_evento.label }}</label>
+      {{ form.fecha_evento }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.mensaje.label }}</label>
+      {{ form.mensaje }}
+    </div>
+
+    <button type="submit" class="btn text-white fw-semibold w-100" style="background-color:#ff8c42;">
+      📩 Enviar solicitud
+    </button>
+  </form>
+</section>
+{% endblock %}

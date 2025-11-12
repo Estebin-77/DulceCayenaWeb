@@ -1,0 +1,95 @@
+<!-- components/formulario_cliente.html -->
+<form method="post" action="{{ action_url }}" class="needs-validation" novalidate>
+    {% csrf_token %}
+    
+    <div class="row g-3">
+        <!-- Nombre -->
+        <div class="col-12">
+            <label for="nombre" class="form-label">Nombre completo *</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" 
+                   value="{{ form.nombre.value|default:'' }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa tu nombre completo.
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="col-12">
+            <label for="email" class="form-label">Email *</label>
+            <input type="email" class="form-control" id="email" name="email" 
+                   value="{{ form.email.value|default:'' }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa un email válido.
+            </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="col-12">
+            <label for="telefono" class="form-label">Teléfono *</label>
+            <input type="tel" class="form-control" id="telefono" name="telefono" 
+                   value="{{ form.telefono.value|default:'' }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa tu número de teléfono.
+            </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="col-12">
+            <label for="direccion" class="form-label">Dirección de entrega *</label>
+            <textarea class="form-control" id="direccion" name="direccion" rows="2" 
+                      placeholder="Dirección donde deseas recibir tu pedido..." required>{{ form.direccion.value|default:'' }}</textarea>
+            <div class="invalid-feedback">
+                Por favor ingresa la dirección de entrega o evento.
+            </div>
+        </div>
+
+        <!-- ✅ FECHA DE EVENTO - Campo OBLIGATORIO -->
+        <div class="col-12">
+            <label for="fecha_evento" class="form-label">📅 Fecha de entrega *</label>
+            <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" 
+                   value="{{ form.fecha_evento.value|default:'' }}"
+                   min="{{ hoy|date:'Y-m-d' }}" required>
+            <div class="invalid-feedback">
+                Por favor selecciona la fecha de entrega.
+            </div>
+        </div>
+
+        <!-- ✅ DETALLES ADICIONALES - ÚNICO CAMPO OPCIONAL -->
+        <div class="col-12">
+            <label for="detalles" class="form-label">📝 Detalles adicionales</label>
+            <textarea class="form-control" id="detalles" name="detalles" rows="4" 
+                      placeholder="Si tienes algun detalle importante que mencionar, agregalo aquí...">{{ form.detalles.value|default:'' }}</textarea>
+            <div class="form-text text-muted">
+                Opcional - Ayúdanos a personalizar tu pedido
+            </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn w-100 text-white py-2 fw-semibold" 
+                    style="background-color:#ff8c42; font-size:1.1rem;">
+                ✅ Confirmar Pedido
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Establecer fecha mínima como hoy
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_evento').min = hoy;
+    
+    // Validación de formulario
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>

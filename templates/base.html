@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dulce Cayena{% endblock %}</title>
+
+  <!-- Bootstrap y Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- CSS Personalizado -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body style="background-color:#fffaf5;">
+
+  <!-- Navbar -->
+  <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/" style="color:#ff8c42;">Dulce Cayena</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link {% if request.path == '/' %}active-link{% endif %}" href="{% url 'home' %}">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'servicios:lista' %}">Servicios</a></li>
+          <li class="nav-item"><a class="nav-link {% if '/tienda' in request.path %}active-link{% endif %}" href="{% url 'tienda:tienda' %}">Tienda</a></li>
+          <li class="nav-item"><a class="nav-link {% if '/contacto' in request.path %}active-link{% endif %}" href="{% url 'contacto' %}">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link {% if '/blog' in request.path %}active-link{% endif %}" href="{% url 'blog' %}">Blog</a></li>
+
+          <!-- 🛒 Icono Carrito -->
+          <li class="nav-item position-relative ms-3">
+            <a class="nav-link d-flex align-items-center" href="{% url 'carrito:ver_carrito' %}">
+              🛒 Carrito
+              <span id="contadorCarrito" class="badge bg-danger position-absolute"
+                    style="top:-6px; right:-12px; display:none; font-size:0.7rem;">
+                0
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- contenido -->
+  <main class="py-5">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-3 mt-auto" style="background-color:#ff8c42; color:white;">
+    © 2025 Dulce Cayena | Postres artesanales con amor 🍰
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ✅ Contador global del carrito -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const contador = document.getElementById("contadorCarrito");
+
+      async function actualizarCarrito() {
+        try {
+          const res = await fetch("{% url 'carrito:cantidad_carrito' %}");
+          const data = await res.json();
+
+          if (data.cantidad > 0) {
+            contador.style.display = "inline-block";
+            contador.textContent = data.cantidad;
+          } else {
+            contador.style.display = "none";
+          }
+        } catch (error) {
+          console.error("⚠️ Error al actualizar carrito:", error);
+        }
+      }
+
+      actualizarCarrito();
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") actualizarCarrito();
+      });
+      window.addEventListener("carrito-actualizado", actualizarCarrito);
+    });
+  </script>
+
+</body>
+</html>

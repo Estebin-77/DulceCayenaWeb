@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="text-center mt-5">
+    <div class="container">
+        <h1 class="fw-bold mb-3" style="color: #5a2a00;">Bienvenido a Dulce Cayena 🍰</h1>
+        <p class="lead text-muted mb-5">
+            Postres artesanales con amor, sabor y un toque de dulzura casera.
+        </p>
+
+        <img src="{% static 'img/magdalenas-chocolate-negro-mante.jpg' %}" 
+             alt="Postres Dulce Cayena" 
+             class="img-fluid rounded shadow-sm mb-4" 
+             style="max-width: 500px;">
+
+        <div class="mt-5">
+            <a href="{% url 'tienda:tienda' %}" class="btn btn-lg" 
+               style="background-color: #ff8c42; color: white; border-radius: 10px;">
+                Ver nuestros postres
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="container mt-5">
+    <div class="row justify-content-center text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm p-3">
+                <img src="{% static 'img/magdalenas-chocolate-negro-mante.jpg' %}" class="card-img-top rounded" alt="Cupcakes">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold" style="color:#5a2a00;">Cupcakes</h5>
+                    <p class="card-text text-muted">Pequeños bocados de felicidad, con sabores únicos.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm p-3">
+                <img src="{% static 'img/magdalenas-chocolate-negro-mante.jpg' %}" class="card-img-top rounded" alt="Tartas">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold" style="color:#5a2a00;">Tartas</h5>
+                    <p class="card-text text-muted">Perfectas para cualquier ocasión especial.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm p-3">
+                <img src="{% static 'img/magdalenas-chocolate-negro-mante.jpg' %}" class="card-img-top rounded" alt="Galletas">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold" style="color:#5a2a00;">Galletas</h5>
+                    <p class="card-text text-muted">Crujientes, dulces y 100% artesanales.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

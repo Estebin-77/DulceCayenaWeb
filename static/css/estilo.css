@@ -1,0 +1,39 @@
+/* 🌸 Estilos personalizados para Dulce Cayena */
+
+body {
+    background-color: #fffaf5; /* blanco cálido pastel */
+    color: #4a3b2f; /* tono cacao */
+}
+
+h1, h2, h3 {
+    color: #ff914d; /* naranja pastel */
+}
+
+.btn-outline-warning {
+    border-color: #ff914d;
+    color: #ff914d;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ff914d;
+    color: white;
+}
+
+footer {
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+header {
+    background-color: #fff7f0;
+}
+
+.was-validated .form-control:valid {
+  border-color: #6cc57c;
+  background-image: none;
+}
+
+.was-validated .form-control:invalid {
+  border-color: #dc3545;
+}

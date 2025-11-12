@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load moneda %}
+{% load carrito_extras %}
+
+{% block title %}Finalizar Compra - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🧁 Finalizar Pedido</h2>
+
+  {% if carrito %}
+  <div class="row g-4">
+
+    <!-- 🛒 Resumen del pedido -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background-color:#ff8c42;">
+          <h5 class="mb-0 fw-semibold">Resumen de tu pedido</h5>
+        </div>
+        <div class="card-body">
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="text-center">Precio</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-end">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for key, item in carrito.items %}
+                <tr>
+                  <td>{{ item.nombre }}</td>
+                  <td class="text-center">{{ item.precio|floatformat:2|moneda }}</td>
+                  <td class="text-center">{{ item.cantidad }}</td>
+                  <td class="text-end">{{ item.cantidad|multiply:item.precio|floatformat:2|moneda }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end fs-5">Total a pagar:</th>
+                  <th class="text-end fw-bold fs-5" style="color:#5a2a00;">{{ total|floatformat:2|moneda }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 💳 Datos de pago + botón Finalizar -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background-color:#ff8c42;">
+          <h5 class="mb-0 fw-semibold">Finalizar Pedido</h5>
+        </div>
+
+        <div class="card-body">
+
+          <p class="mb-2"><strong>Banco:</strong> Banco Popular Dominicano</p>
+          <p class="mb-2"><strong>Cuenta Corriente:</strong> 123-456789-0</p>
+          <p class="mb-2"><strong>Nombre:</strong> Dulce Cayena Repostería</p>
+          <p class="mb-4"><strong>Concepto:</strong> Pedido online</p>
+
+          <div id="mensajePago" class="shadow-sm text-center mt-3 mb-3 p-3"
+            style="color:#5a2a00; background-color:#fff3cd; border:1px solid #f0b68c; border-radius:10px;">
+            <strong>📄 Importante:</strong> Envía tu comprobante al
+            <a href="mailto:dulcecayena@gmail.com" class="fw-bold" style="color:#d17a49;">correo</a>
+            o WhatsApp
+            <a href="https://wa.me/18091234567" class="fw-bold" style="color:#25d366;">809-123-4567</a>.
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 justify-content-between">
+            <a href="{% url 'carrito:limpiar_carrito' %}" class="btn btn-outline-danger">Vaciar Carrito</a>
+
+            <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-secondary">Seguir Ordenando</a>
+
+            <button type="button" class="btn text-white" id="btnAbrirModal" style="background-color:#ff8c42;">
+              Finalizar Pedido
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {% else %}
+  <!-- 🛒 Carrito vacío -->
+  <div class="text-center mt-5 p-4 shadow-sm" style="background:#fff; border-radius:12px;">
+    <h4 class="fw-semibold mb-3" style="color:#5a2a00;">Tu carrito está vacío 🛒</h4>
+    <a href="{% url 'tienda:tienda' %}" class="btn btn-warning px-4 py-2 fw-semibold">Ir a la tienda</a>
+  </div>
+  {% endif %}
+
+</section>
+
+
+{% if carrito %}
+{% url 'pedidos:confirmar' as pedidos_url %}
+<!-- ✅ MODAL FORMULARIO CLIENTE -->
+<div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4">
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100 text-center" style="color:#5a2a00;">
+          Ingrese sus datos para confirmar 🧁
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        {% include 'components/formulario_cliente.html' with action_url=pedidos_url %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- 🕒 Modal de carga -->
+<div id="modalCarga" style="
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(255,255,255,0.95); z-index:9999;
+  justify-content:center; align-items:center; flex-direction:column;
+  font-family:'Poppins', sans-serif; color:#5a2a00;">
+  <div style="font-size:3rem;">⏳</div>
+  <p id="textoCarga" style="font-size:1.2rem; margin-top:10px;">
+    Confirmando su pedido, por favor espere<span id="puntos">...</span>
+  </p>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // ✅ Mostrar modal del formulario
+    const btnAbrir = document.getElementById("btnAbrirModal");
+    const modalCliente = new bootstrap.Modal(document.getElementById("modalCliente"));
+
+    btnAbrir.addEventListener("click", () => modalCliente.show());
+
+    // ✅ Animación de carga en envío
+    const form = document.querySelector("form.needs-validation");
+    const modalCarga = document.getElementById("modalCarga");
+    const puntos = document.getElementById("puntos");
+    let animacionPuntos;
+
+    form.addEventListener("submit", function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        form.classList.add("was-validated");
+        return;
+      }
+
+      event.preventDefault();
+      modalCliente.hide();
+      modalCarga.style.display = "flex";
+
+      let i = 0;
+      animacionPuntos = setInterval(() => {
+        puntos.textContent = '.'.repeat((i++ % 3) + 1);
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(animacionPuntos);
+        form.submit();
+      }, 3000);
+    });
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnVaciar = document.querySelector(".btn-outline-danger[href*='limpiar']");
+  if (!btnVaciar) return;
+
+  btnVaciar.addEventListener("click", function(e) {
+    e.preventDefault();
+    const url = this.getAttribute("href");
+
+    fetch(url, {
+      method: "GET",
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) return;
+
+      // ✅ Actualiza contador global
+      window.dispatchEvent(new Event("carrito-actualizado"));
+
+      // ✅ Copiar EXACTO lo del carrito vacío (carrito.html)
+      const main = document.querySelector("main");
+      main.innerHTML = `
+        <section class="container text-center my-5 py-5">
+          <h3 class="fw-bold mb-3" style="color:#5a2a00;">Tu carrito está vacío 🛒</h3>
+          <p class="text-muted mb-4">Aún no has agregado nada.</p>
+          <a href="/tienda/" class="btn btn-warning">Ir a la tineda 🧁</a>
+        </section>
+      `;
+    })
+    .catch(() => {
+      // fallback seguro si AJAX falla
+      window.location.href = url;
+    });
+  });
+});
+</script>
+
+
+{% endif %}
+
+
+<style>
+  #mensajePago a {
+    text-decoration: none;
+  }
+
+  #mensajePago a:hover {
+    text-decoration: underline;
+  }
+
+  #modalCarga {
+    backdrop-filter: blur(3px);
+  }
+</style>
+
+{% endblock %}

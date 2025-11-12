@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ servicio.titulo }}{% endblock %}
+{% load moneda %}
+
+{% block content %}
+<section class="container my-5">
+  <!-- Migas / breadcrumb simple -->
+  <nav class="mb-3" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'servicios:lista' %}">Servicios</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ servicio.titulo }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Columna: Detalles del servicio -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        {% if servicio.imagen %}
+          <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.titulo }}">
+        {% endif %}
+        <div class="card-body">
+          <h1 class="h4 fw-bold" style="color:#5a2a00;">{{ servicio.titulo }}</h1>
+
+          {% if servicio.precio_desde %}
+            <p class="mt-2 mb-2">
+              <span class="badge bg-warning text-dark">Desde {{ servicio.precio_desde|moneda }}</span>
+            </p>
+          {% endif %}
+
+          {% if servicio.descripcion %}
+            <!-- Usa linebreaks para respetar saltos de línea si los hay -->
+            <div class="mt-2" style="line-height:1.7;">{{ servicio.descripcion|linebreaks }}</div>
+          {% else %}
+            <p class="text-muted">Pronto agregaremos una descripción detallada de este servicio.</p>
+          {% endif %}
+
+          <!-- Bloque opcional de highlights (si quieres mostrar bullets fijos) -->
+          <ul class="mt-3">
+            <li>Personalización a medida</li>
+            <li>Atención de eventos</li>
+            <li>Entrega en zona metropolitana</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna: Formulario de solicitud -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background:#ff8c42;">
+          <strong>Solicitar este servicio</strong>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{{ action_url }}" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              {{ form.nombre }}
+              {{ form.nombre.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              {{ form.email }}
+              {{ form.email.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              {{ form.telefono }}
+              {{ form.telefono.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Fecha del evento (opcional)</label>
+              {{ form.fecha_evento }}
+              {{ form.fecha_evento.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Detalles adicionales (opcional)</label>
+              {{ form.detalles }}
+              {{ form.detalles.errors }}
+            </div>
+
+            <button type="submit" class="btn px-4 text-white fw-semibold w-100" style="background-color:#ff8c42; border:none;">
+              ✅ Enviar solicitud
+            </button>
+          </form>
+
+          <p class="text-muted small mt-3">
+            *Te contactaremos para confirmar disponibilidad, logística y presupuesto final.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

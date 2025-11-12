@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Servicios - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🍰 Nuestros Servicios</h2>
+
+ <div class="row g-4">
+  {% for servicio in servicios %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 servicio-card">
+        {% if servicio.imagen %}
+          <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.titulo }}">
+        {% endif %}
+        <div class="card-body text-center">
+          <h5 class="card-title fw-semibold" style="color:#5a2a00;">{{ servicio.titulo }}</h5>
+          <p class="card-text text-muted small">{{ servicio.contenido|truncatewords:20 }}</p>
+          <a href="{% url 'servicio_detalle' servicio.slug %}" class="btn btn-outline-success mt-2">
+            🍰 Conocer más
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-center">No hay servicios disponibles por el momento.</p>
+  {% endfor %}
+</div>
+
+</section>
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .servicio-card {
+    border-radius: 15px;
+    transition: all 0.3s ease-in-out;
+    background-color: #fff7f2;
+  }
+
+  .servicio-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 6px 20px rgba(90, 42, 0, 0.15);
+  }
+
+  .servicio-card img {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  h2 {
+    color: #e8a87c;
+  }
+</style>
+{% endblock %}

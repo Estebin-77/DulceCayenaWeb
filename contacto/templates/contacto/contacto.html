@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contacto - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">📩 Contáctanos</h2>
+
+  <div class="col-lg-8 mx-auto">
+    <p class="text-center text-muted mb-4">
+      Si deseas realizar un pedido personalizado o tienes alguna consulta, completa el siguiente formulario y te responderemos pronto.
+    </p>
+
+    <form method="POST" class="needs-validation" novalidate>
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" name="nombre" placeholder="Tu nombre" required>
+        <div class="invalid-feedback">Por favor, ingresa tu nombre.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" name="email" placeholder="tu@correo.com" required>
+        <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Asunto</label>
+        <input type="text" class="form-control" name="asunto" placeholder="Motivo del mensaje" required>
+        <div class="invalid-feedback">Por favor, escribe un asunto.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Mensaje</label>
+        <textarea class="form-control" name="mensaje" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
+        <div class="invalid-feedback">Por favor, escribe un mensaje.</div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success px-4">Enviar mensaje</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .was-validated .form-control:valid {
+    border-color: #6cc57c;
+  }
+
+  .was-validated .form-control:invalid {
+    border-color: #dc3545;
+  }
+
+  .btn-success {
+    background-color: #e8a87c;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background-color: #d17a49;
+  }
+</style>
+
+<script>
+  // Validación visual Bootstrap
+  (() => {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+{% endblock %}

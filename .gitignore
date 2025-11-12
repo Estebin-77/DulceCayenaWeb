@@ -1,0 +1,45 @@
+# Archivos y carpetas que no deben subirse a GitHub (proyecto Django con PostgreSQL)
+
+# Entorno virtual
+venv/
+.env
+.env.local
+.env.*
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+*.class
+
+# Archivos de logs
+*.log
+
+# Configuración del editor
+.vscode/
+.idea/
+
+# Archivos de migración innecesarios
+*.pot
+*.py~
+*.swp
+
+# Archivos estáticos generados
+staticfiles/
+media/
+
+# Archivos de cobertura y pruebas
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+*,cover
+
+# Archivos de Docker, build o cache (si los usas)
+build/
+dist/
+*.egg-info/
+.DS_Store
+
+# Carpeta de configuración del sistema
+__MACOSX/
+
