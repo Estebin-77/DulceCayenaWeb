@@ -25,7 +25,7 @@
           {% for key, item in request.session.carrito.items %}
           <tr>
             <td>{{ item.nombre }}</td>
-            <td class="text-center">{{ item.precio|floatformat:2|moneda }}</td>
+            <td class="text-center">{{ item.precio|moneda }}</td>
             <td class="text-center">
               <div class="d-inline-flex align-items-center gap-2">
                 <a href="{% url 'carrito:restar_producto' item.producto_id %}" class="btn btn-sm btn-outline-secondary">-</a>
@@ -33,7 +33,7 @@
                 <a href="{% url 'carrito:agregar_al_carrito' item.producto_id %}" class="btn btn-sm btn-outline-secondary">+</a>
               </div>
             </td>
-            <td class="text-end">{{ item.cantidad|multiply:item.precio|floatformat:2|moneda }}</td>
+            <td class="text-end">{{ item.cantidad|multiply:item.precio|moneda }}</td>
             <td class="text-center">
               <a href="{% url 'carrito:eliminar_producto' key %}" class="btn btn-sm btn-danger">🗑️</a>
             </td>
@@ -43,7 +43,7 @@
         <tfoot>
           <tr>
             <th colspan="3" class="text-end">Total:</th>
-            <th class="text-end" style="color:#5a2a00;">{{ request.session.carrito|get_total_carrito|floatformat:2|moneda }}</th>
+            <th class="text-end" style="color:#5a2a00;">{{ request.session.carrito|get_total_carrito|moneda }}</th>
             <th></th>
           </tr>
         </tfoot>
