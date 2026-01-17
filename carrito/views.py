@@ -60,10 +60,11 @@ def ver_carrito(request):
     if not carrito:
         return render(request, "carrito/carrito_vacio.html")
 
-    total = sum(float(item["precio"]) * item["cantidad"] for item in carrito.values())
+    carrito_obj = Carrito(request)
+    total = carrito_obj.total()
 
     return render(request, "carrito/carrito.html", {
-        "carrito": carrito,
+        "carrito": carrito_obj.carrito,
         "total": total
     })
 
