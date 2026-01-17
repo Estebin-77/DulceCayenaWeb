@@ -44,7 +44,7 @@ ALLOWED_HOSTS=127.0.0.1,localhost
 
 DB_NAME=dulcecayena
 DB_USER=postgres
-DB_PASSWORD=07041992
+DB_PASSWORD=tu_password
 DB_HOST=localhost
 DB_PORT=5432
 
