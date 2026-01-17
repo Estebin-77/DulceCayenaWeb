@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.db import transaction
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -49,41 +50,43 @@ def confirmar_pedido(request):
 
     total = carrito.total()
 
-    # Crear el pedido
-    pedido = Pedido.objects.create(
-        nombre=nombre,
-        email=email,
-        telefono=telefono,
-        direccion=direccion,
-        fecha_evento=fecha_evento,
-        detalles=detalles,
-        total=total,
-        estado='pendiente',
-    )
-
-    # DEBUG: Verificar el pedido creado
-    print("📦 PEDIDO CREADO:")
-    print(f"Pedido ID: {pedido.id}")
-    print(f"Fecha evento guardada: {pedido.fecha_evento}")
-    print(f"Detalles guardados: {pedido.detalles}")
-    print("=" * 50)
-
-    # Crear líneas de pedido
-    for item in carrito.carrito.values():
-        producto = Producto.objects.get(id=item["producto_id"])
-        cantidad = item["cantidad"]
-        precio = Decimal(item["precio"])
-        LineaPedido.objects.create(
-            pedido=pedido,
-            producto=producto,
-            nombre_producto=producto.nombre,
-            precio_unitario=precio,
-            cantidad=cantidad,
-            subtotal=precio * cantidad,
+    # Crear el pedido (atómico)
+    with transaction.atomic():
+        pedido = Pedido.objects.create(
+            nombre=nombre,
+            email=email,
+            telefono=telefono,
+            direccion=direccion,
+            fecha_evento=fecha_evento,
+            detalles=detalles,
+            total=total,
+            estado='pendiente',
         )
 
-    carrito.limpiar()
-    request.session.modified = True
+        # DEBUG: Verificar el pedido creado
+        print("📦 PEDIDO CREADO:")
+        print(f"Pedido ID: {pedido.id}")
+        print(f"Fecha evento guardada: {pedido.fecha_evento}")
+        print(f"Detalles guardados: {pedido.detalles}")
+        print("=" * 50)
+
+        # Crear líneas de pedido
+        for item in carrito.carrito.values():
+            producto = Producto.objects.get(id=item["producto_id"])
+            cantidad = item["cantidad"]
+            precio = Decimal(item["precio"])
+            LineaPedido.objects.create(
+                pedido=pedido,
+                producto=producto,
+                nombre_producto=producto.nombre,
+                precio_unitario=precio,
+                cantidad=cantidad,
+                subtotal=precio * cantidad,
+            )
+
+        carrito.limpiar()
+        request.session.modified = True
+
 
     return redirect('pedidos:exito', pedido_id=pedido.id)
 
