@@ -6,40 +6,34 @@ venv/
 .env
 .env.local
 .env.*
-
 # 🐍 Archivos temporales de Python
 __pycache__/
 *.py[cod]
 *$py.class
-
 # 🧾 Archivos de logs
 *.log
-
 # 💻 Configuración de editores
 .vscode/
 .idea/
-
 # 🧱 Archivos de migración innecesarios o temporales
 *.pot
 *.py~
 *.swp
-
 # 🎨 Archivos estáticos generados
 staticfiles/
 media/
-
 # 🧪 Archivos de cobertura y pruebas
 htmlcov/
 .tox/
 .coverage
 coverage.xml
 *,cover
-
 # 🐳 Docker / Build / Cache
 build/
 dist/
 *.egg-info/
 .DS_Store
-
 # 🍏 Configuración del sistema macOS
 __MACOSX/
+# Python
+*.pyc
