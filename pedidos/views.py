@@ -15,6 +15,9 @@ from .forms import PedidoClienteForm
 from .models import Pedido, LineaPedido
 from carrito.carrito import Carrito
 from tienda.models import Producto
+import logging 
+
+logger = logging.getLogger(__name__)
 
 
 def confirmar_pedido(request):
@@ -23,7 +26,7 @@ def confirmar_pedido(request):
 
     form = PedidoClienteForm(request.POST)
     if not form.is_valid():
-        print("❌ Formulario inválido:", form.errors)  # DEBUG
+        logger.warning("❌ Formulario inválido: %s", form.errors)  # DEBUG
         return render(request, "carrito/checkout.html", {"form": form})
 
     carrito = Carrito(request)
@@ -38,15 +41,15 @@ def confirmar_pedido(request):
     detalles = form.cleaned_data.get('detalles', '')
 
     # DEBUG: Verificar los datos del formulario
-    print("=" * 50)
-    print("📋 DATOS DEL FORMULARIO:")
-    print(f"Nombre: {nombre}")
-    print(f"Email: {email}")
-    print(f"Teléfono: {telefono}")
-    print(f"Dirección: {direccion}")
-    print(f"Fecha evento: {fecha_evento} (Tipo: {type(fecha_evento)})")
-    print(f"Detalles: {detalles}")
-    print("=" * 50)
+    logger.debug("=" * 50)
+    logger.debug("DATOS DEL FORMULARIO:")
+    logger.debug("Nombre: %s", nombre)
+    logger.debug("Email: %s", email)
+    logger.debug("Teléfono: %s", telefono)
+    logger.debug("Dirección: %s", direccion)
+    logger.debug("Fecha evento: %s (Tipo: %s)", fecha_evento, type(fecha_evento))
+    logger.debug("Detalles_len: %s", len(detalles or ""))
+    logger.debug("=" * 50)
 
     total = carrito.total()
 
@@ -64,11 +67,9 @@ def confirmar_pedido(request):
         )
 
         # DEBUG: Verificar el pedido creado
-        print("📦 PEDIDO CREADO:")
-        print(f"Pedido ID: {pedido.id}")
-        print(f"Fecha evento guardada: {pedido.fecha_evento}")
-        print(f"Detalles guardados: {pedido.detalles}")
-        print("=" * 50)
+        logger.info("PEDIDO CREADO: id=%s total=%s estado=%s", pedido.id, pedido.total, pedido.estado)
+        logger.debug("Fecha evento guardada: %s", pedido.fecha_evento)
+        logger.debug("Detalles guardados: %s", pedido.detalles)
 
         # Crear líneas de pedido
         for item in carrito.carrito.values():
@@ -95,12 +96,9 @@ def exito(request, pedido_id):
     pedido = get_object_or_404(Pedido, pk=pedido_id)
     
     # DEBUG: Verificar qué contiene el pedido en la base de datos
-    print("🎯 PEDIDO EN VISTA EXITO:")
-    print(f"Pedido ID: {pedido.id}")
-    print(f"Fecha evento: {pedido.fecha_evento}")
-    print(f"Detalles: {pedido.detalles}")
-    print(f"Tipo de fecha_evento: {type(pedido.fecha_evento)}")
-    print("=" * 50)
+    logger.debug("PEDIDO EN VISTA EXITO: id=%s fecha_evento=%s detalles=%s tipo_fecha_evento=%s",
+                pedido.id, pedido.fecha_evento, pedido.detalles, type(pedido.fecha_evento))
+
     
     return render(request, 'pedidos/exito.html', {"pedido": pedido})
 
