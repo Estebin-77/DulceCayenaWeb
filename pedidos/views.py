@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -107,7 +108,13 @@ def descargar_pdf(request, pedido_id):
     pedido = get_object_or_404(Pedido, pk=pedido_id)
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="pedido_{pedido.id}.pdf"'
+
+    ano = date.today().year
+    codigo_factura = f"DC-{pedido.id:04d}-{ano}"
+
+
+    response['Content-Disposition'] = f'attachment; filename="factura_{codigo_factura}.pdf"'
+
 
     pdf = canvas.Canvas(response, pagesize=letter)
     width, height = letter
@@ -124,7 +131,7 @@ def descargar_pdf(request, pedido_id):
     pdf.setFont("Helvetica-Bold", 18)
     pdf.drawString(40, height - 42, "Dulce Cayena Repostería")
 
-    codigo_factura = f"DC-{pedido.id:04d}-2025"
+
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(width - 200, height - 42, f"Factura: {codigo_factura}")
 
