@@ -1,115 +1,137 @@
-#  DulceCayenaWeb
+# DulceCayenaWeb
 
-**DulceCayenaWeb** es una aplicación web desarrollada con **Django y PostgreSQL** para una repostería artesanal.  
-El sistema permite gestionar productos, servicios, pedidos, contacto y publicaciones de blog con un diseño moderno, minimalista y funcional.
-
----
-
-##  Tecnologías utilizadas
-
-- **Python 3.10+**
-- **Django 5.2.7**
-- **PostgreSQL**
-- **HTML5, CSS3 y Bootstrap**
-- **JavaScript (ES6)**
-- **Git y GitHub**
-- **python-dotenv** para la gestión segura de variables de entorno
+DulceCayenaWeb es una aplicación web full-stack desarrollada con Django y PostgreSQL para una repostería artesanal.  
+El proyecto está diseñado con enfoque en arquitectura limpia, buenas prácticas y preparación para producción.
 
 ---
 
-## Instalación y ejecución local
+## Descripción
 
-Sigue estos pasos para ejecutar el proyecto en tu máquina local 👇
+La aplicación permite gestionar productos, pedidos, publicaciones de blog, contacto con clientes y facturación en PDF, ofreciendo una experiencia moderna, clara y funcional.
 
-### 1️⃣ Clonar el repositorio
-```bash
-git clone https://github.com/Estebin-77/DulceCayenaWeb.git
-cd DulceCayenaWeb
+Este proyecto forma parte de mi portafolio profesional como desarrollador de software.
 
-2️⃣ Crear y activar el entorno virtual
-python -m venv venv
-venv\Scripts\activate   # En Windows
-# source venv/bin/activate  # En Linux/Mac
+---
 
-3️⃣ Instalar dependencias
-pip install -r requirements.txt
+## Funcionalidades
 
-4️⃣ Configurar variables de entorno
+- Catálogo de productos y servicios
+- Carrito de compras dinámico
+- Gestión de pedidos
+- Blog de publicaciones
+- Formulario de contacto con envío de correo
+- Generación de facturas PDF
+- Panel administrativo Django
+- Variables de entorno seguras
+- Base de datos PostgreSQL
 
-Crea un archivo .env en la raíz del proyecto con tus datos:
+---
 
-SECRET_KEY=django-inseguro-cambia-esta-clave-por-una-real
-DEBUG=True
-ALLOWED_HOSTS=127.0.0.1,localhost
+## Tecnologías utilizadas
 
-DB_NAME=dulcecayena
-DB_USER=postgres
-DB_PASSWORD=tu_password
-DB_HOST=localhost
-DB_PORT=5432
+- Python 3.10+
+- Django 5.2
+- PostgreSQL
+- HTML5 / CSS3 / Bootstrap
+- JavaScript ES6
+- Git y GitHub
+- python-dotenv
 
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=tu_correo@gmail.com
-EMAIL_HOST_PASSWORD=tu_clave_de_aplicacion
+---
 
-Importante: nunca subas este archivo a GitHub, ya está protegido por .gitignore.
+## Estructura del proyecto
 
-5️⃣ Aplicar migraciones
-
-python manage.py migrate
-
-6️⃣ Ejecutar el servidor
-
-python manage.py runserver
-
-Luego entra en tu navegador a http://127.0.0.1:8000/
-
-Estructura del proyecto
 DulceCayenaWeb/
 │
+├── ProyectoDulceCayena/
+├── inicio/
+├── servicios/
+├── tienda/
+├── contacto/
+├── blog/
+├── pedidos/
+├── carrito/
 ├── manage.py
-├── .env
-├── .gitignore
-├── README.md
 ├── requirements.txt
-│
-├── ProyectoDulceCayena/    # Configuración principal del proyecto
-├── inicio/                 # Página de inicio y contenido estático
-├── servicios/              # App de servicios de repostería
-├── tienda/                 # App de tienda con productos y carrito
-├── contacto/               # Formulario de contacto y correo
-├── blog/                   # Blog de noticias o recetas
-├── pedidos/                # Gestión de pedidos
-└── carrito/                # Funcionalidades del carrito de compras
+└── README.md
 
-Funcionalidades principales
+---
 
-🏠 Página de inicio con presentación del negocio
+## Instalación local
 
-🍰 Listado de productos y servicios con imágenes
+Clonar el repositorio:
 
-🛒 Carrito de compras dinámico
+git clone https://github.com/Estebin-77/DulceCayenaWeb.git  
+cd DulceCayenaWeb  
 
-📨 Formulario de contacto funcional con envío de correo
+Crear entorno virtual:
 
-📝 Blog para publicaciones y artículos
+python -m venv venv  
+venv\Scripts\activate  
 
-⚙️ Panel administrativo completo de Django
+Instalar dependencias:
 
-🔐 Variables de entorno protegidas (.env)
+pip install -r requirements.txt  
 
-🧾 Base de datos configurada con PostgreSQL
+Migraciones:
 
+python manage.py migrate  
 
-Autor:
+Ejecutar servidor:
 
-Estiben De La Rosa
-Desarrollador de Software Full Stack
-📍 República Dominicana
-GitHub: Estebin-77
+python manage.py runserver  
 
-Licencia
+---
+
+## Variables de entorno
+
+Archivo .env:
+
+SECRET_KEY=tu_secret_key  
+DEBUG=True  
+ALLOWED_HOSTS=127.0.0.1,localhost  
+
+DB_NAME=dulcecayena  
+DB_USER=postgres  
+DB_PASSWORD=tu_password  
+DB_HOST=localhost  
+DB_PORT=5432  
+
+---
+
+## Enfoque del proyecto
+
+Este proyecto fue desarrollado aplicando:
+
+- Arquitectura clara
+- Código mantenible
+- Buenas prácticas Django
+- Seguridad con variables de entorno
+- Control de versiones profesional
+- Preparación para despliegue en producción
+
+---
+
+## Roadmap
+
+- Despliegue en producción
+- Autenticación de usuarios
+- Dashboard administrativo personalizado
+- Pasarela de pagos
+- Optimización SEO
+
+---
+
+## Autor
+
+Estiben De La Rosa  
+Desarrollador de Software Full Stack  
+República Dominicana  
+
+GitHub: https://github.com/Estebin-77  
+
+---
+
+## Licencia
+
 Este proyecto se distribuye bajo la licencia MIT.
-Puedes usarlo, modificarlo y distribuirlo libremente con reconocimiento al autor original.
