@@ -27,8 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 🔐 Seguridad
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+if not SECRET_KEY:
+    raise ValueError("Falta la variable de entorno SECRET_KEY")
+
 DEBUG = env_bool("DEBUG", default=True)
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()]
+
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ValueError("Falta la variable de entorno ALLOWED_HOSTS en producción")
+
 # 📦 Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -82,7 +89,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ProyectoDulceCayena.wsgi.application'
 
 # 🗄️ Base de datos (PostgreSQL)
+# - En produccion (Render), se usa DATABASE_URL si esta disponible.
+# - En desarrollo local, se usan DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT.
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DEBUG and not DATABASE_URL:
+    raise ValueError("Falta la variable de entorno DATABASE_URL en producción")
 
 if DATABASE_URL:
     DATABASES = {
@@ -130,13 +142,24 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
+
+# Archivos multimedia
+# Cloudinary gestiona el almacenamiento principal de media.
+# MEDIA_URL y MEDIA_ROOT se dejan definidos solo como compatibilidad local. 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+cloudinary_cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+cloudinary_api_key = os.getenv("CLOUDINARY_API_KEY")
+cloudinary_api_secret = os.getenv("CLOUDINARY_API_SECRET")
+
+if not DEBUG and not all([cloudinary_cloud_name, cloudinary_api_key, cloudinary_api_secret]):
+    raise ValueError("Faltan variables de entorno de Cloudinary en producción")
+
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
+    "CLOUD_NAME": cloudinary_cloud_name,
+    "API_KEY": cloudinary_api_key,
+    "API_SECRET": cloudinary_api_secret,
 }
 
 # 🔢 Campo de clave primaria por defecto
@@ -168,3 +191,6 @@ if not DEBUG:
 
     # CSRF trusted origins (separados por coma). Ej: https://tudominio.com,https://www.tudominio.com
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
+    
+    if not CSRF_TRUSTED_ORIGINS:
+        raise ValueError("Falta la variable de entorno CSRF_TRUSTED_ORIGINS en producción")
