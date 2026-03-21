@@ -1,43 +1,232 @@
 {% extends "base.html" %}
 {% load moneda %}
 
-{% block title %}Pedido confirmado{% endblock %}
+{% block title %}Pedido realizado | Dulce Cayena{% endblock %}
 
 {% block content %}
-<section class="container text-center my-5 py-5">
-  <h2 class="fw-bold text-success">✅ ¡Pedido completado con éxito!</h2>
-  <p class="mt-3">Gracias <strong>{{ pedido.nombre }}</strong> por tu compra 🧁</p>
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
 
-  <p class="mb-4">Tu número de pedido es: <strong>#{{ pedido.id }}</strong></p>
+      <div class="card shadow-sm border-0 rounded-4 exito-card">
+        <div class="card-body p-4 p-md-5 text-center">
 
-  <!-- Mostrar información adicional del pedido -->
-  <div class="card mx-auto mb-4" style="max-width: 500px;">
-    <div class="card-body text-start">
-      <h5 class="card-title">Resumen de tu pedido:</h5>
-      <p><strong>Nombre:</strong> {{ pedido.nombre }}</p>
-      <p><strong>Email:</strong> {{ pedido.email }}</p>
-      <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
-      <p><strong>Dirección:</strong> {{ pedido.direccion }}</p>
-      
-      {% if pedido.fecha_evento %}
-      <p><strong>Fecha de evento/entrega:</strong> {{ pedido.fecha_evento|date:"d/m/Y" }}</p>
-      {% endif %}
-      
-      {% if pedido.detalles %}
-      <p><strong>Detalles adicionales:</strong> {{ pedido.detalles }}</p>
-      {% endif %}
-      
-      <p><strong>Total: </strong>{{ pedido.total|moneda }}</p>
+          <div class="icono-exito mb-3">✓</div>
+
+          <h1 class="h3 fw-bold mb-2">¡Pedido realizado con éxito!</h1>
+          <p class="text-muted mb-4">
+            Hemos recibido tu pedido correctamente. Guarda tu código para consultar su estado cuando lo necesites.
+          </p>
+
+          <div class="codigo-box mb-4">
+            <span class="codigo-label">Código de tu pedido</span>
+
+            <div class="codigo-copy-wrap">
+              <div id="codigoPedido" class="codigo-valor">{{ pedido.codigo_pedido }}</div>
+              <button
+                type="button"
+                id="btnCopiarCodigo"
+                class="btn btn-outline-secondary btn-sm rounded-3"
+              >
+                Copiar
+              </button>
+            </div>
+
+            <small id="mensajeCopiado" class="mensaje-copiado" aria-live="polite"></small>
+          </div>
+
+          <div class="row g-3 text-start mb-4">
+            <div class="col-md-6">
+              <div class="info-item">
+                <span class="info-label">Cliente</span>
+                <span class="info-value">{{ pedido.nombre }}</span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="info-item">
+                <span class="info-label">Correo</span>
+                <span class="info-value">{{ pedido.email }}</span>
+              </div>
+            </div>
+
+            {% if pedido.telefono %}
+            <div class="col-md-6">
+              <div class="info-item">
+                <span class="info-label">Teléfono</span>
+                <span class="info-value">{{ pedido.telefono }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="col-md-6">
+              <div class="info-item">
+                <span class="info-label">Total</span>
+                <span class="info-value">{{ pedido.total|moneda }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-light border rounded-4 text-start ayuda-box mb-4">
+            <p class="mb-2 fw-semibold">Qué puedes hacer ahora:</p>
+            <ul class="mb-0 ps-3">
+              <li>Guardar el código del pedido.</li>
+              <li>Consultar su estado más adelante desde la opción del menú.</li>
+              <li>Descargar el comprobante en PDF, si lo necesitas.</li>
+            </ul>
+          </div>
+
+          <div class="d-grid d-md-flex justify-content-md-center gap-2">
+            <a href="{% url 'pedidos:consultar_pedido' %}?codigo={{ pedido.codigo_pedido|urlencode }}&email={{ pedido.email|urlencode }}" class="btn btn-principal btn-lg rounded-3">
+              Consultar este pedido
+            </a>
+
+            <a href="{% url 'pedidos:descargar_pdf' pedido.id %}" class="btn btn-outline-secondary btn-lg rounded-3">
+              Descargar PDF
+            </a>
+
+            <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-dark btn-lg rounded-3">
+              Volver a la tienda
+            </a>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <!-- ✅ URL directa temporal -->
-  <a href="/pedidos/descargar-pdf/{{ pedido.id }}/" class="btn btn-success btn-lg mb-3">
-    📄 Descargar factura PDF
-  </a>
-
-  <br>
-
-  <a href="{% url 'tienda:tienda' %}" class="btn btn-primary">Seguir comprando 🛍️</a>
 </section>
+
+<style>
+  .exito-card {
+    background: #ffffff;
+  }
+
+  .icono-exito {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #d1e7dd;
+    color: #0f5132;
+    font-size: 2rem;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(15, 81, 50, 0.12);
+  }
+
+  .codigo-box {
+    background: #fff7f2;
+    border: 1px solid #ffe1cc;
+    border-radius: 1rem;
+    padding: 1.2rem;
+  }
+
+  .codigo-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #8a7b70;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .codigo-copy-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .codigo-valor {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ff8c42;
+    letter-spacing: 0.03em;
+    word-break: break-word;
+  }
+
+  .mensaje-copiado {
+    display: block;
+    min-height: 1.2rem;
+    margin-top: 0.6rem;
+    color: #198754;
+    font-weight: 600;
+  }
+
+  .info-item {
+    background: #fff;
+    border: 1px solid #f1e3d8;
+    border-radius: 0.9rem;
+    padding: 0.9rem 1rem;
+    height: 100%;
+  }
+
+  .info-label {
+    display: block;
+    font-size: 0.82rem;
+    color: #8a7b70;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+
+  .info-value {
+    display: block;
+    color: #4a2e1f;
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .ayuda-box {
+    background: #fffaf5;
+    border-color: #f0c9a7 !important;
+  }
+
+  .btn-principal {
+    background-color: #ff8c42;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn-principal:hover {
+    background-color: #f07d31;
+    color: #fff;
+  }
+
+  @media (max-width: 576px) {
+    .codigo-valor {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btnCopiar = document.getElementById("btnCopiarCodigo");
+    const codigoPedido = document.getElementById("codigoPedido");
+    const mensajeCopiado = document.getElementById("mensajeCopiado");
+
+    if (!btnCopiar || !codigoPedido || !mensajeCopiado) return;
+
+    btnCopiar.addEventListener("click", async () => {
+      const texto = codigoPedido.textContent.trim();
+
+      try {
+        await navigator.clipboard.writeText(texto);
+        mensajeCopiado.textContent = "Código copiado correctamente.";
+        btnCopiar.textContent = "Copiado";
+
+        setTimeout(() => {
+          mensajeCopiado.textContent = "";
+          btnCopiar.textContent = "Copiar";
+        }, 2000);
+      } catch (error) {
+        mensajeCopiado.textContent = "No se pudo copiar automáticamente. Cópialo manualmente.";
+      }
+    });
+  });
+</script>
 {% endblock %}

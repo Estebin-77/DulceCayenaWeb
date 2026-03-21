@@ -22,21 +22,51 @@
   <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
     <div class="container">
       <a class="navbar-brand fw-bold" href="/" style="color:#ff8c42;">Dulce Cayena</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link {% if request.path == '/' %}active-link{% endif %}" href="{% url 'home' %}">Inicio</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'servicios:lista' %}">Servicios</a></li>
-          <li class="nav-item"><a class="nav-link {% if '/tienda' in request.path %}active-link{% endif %}" href="{% url 'tienda:tienda' %}">Tienda</a></li>
-          <li class="nav-item"><a class="nav-link {% if '/contacto' in request.path %}active-link{% endif %}" href="{% url 'contacto' %}">Contacto</a></li>
-          <li class="nav-item"><a class="nav-link {% if '/blog' in request.path %}active-link{% endif %}" href="{% url 'blog' %}">Blog</a></li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active-link{% endif %}" href="{% url 'home' %}">
+              Inicio
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if '/servicios' in request.path %}active-link{% endif %}" href="{% url 'servicios:lista' %}">
+              Servicios
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if '/tienda' in request.path %}active-link{% endif %}" href="{% url 'tienda:tienda' %}">
+              Tienda
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if '/pedidos' in request.path %}active-link{% endif %}" href="{% url 'pedidos:consultar_pedido' %}">
+              Consultar pedido
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if '/contacto' in request.path %}active-link{% endif %}" href="{% url 'contacto' %}">
+              Contacto
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if '/blog' in request.path %}active-link{% endif %}" href="{% url 'blog' %}">
+              Blog
+            </a>
+          </li>
 
           <!-- 🛒 Icono Carrito -->
           <li class="nav-item position-relative ms-3">
-            <a class="nav-link d-flex align-items-center" href="{% url 'carrito:ver_carrito' %}">
+            <a class="nav-link d-flex align-items-center {% if '/carrito' in request.path %}active-link{% endif %}" href="{% url 'carrito:ver_carrito' %}">
               🛒 Carrito
               <span id="contadorCarrito" class="badge bg-danger position-absolute"
                     style="top:-6px; right:-12px; display:none; font-size:0.7rem;">

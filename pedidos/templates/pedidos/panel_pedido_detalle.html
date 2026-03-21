@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load moneda %}
+
+{% block title %}Detalle del pedido | Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <a href="{% url 'pedidos:panel_pedidos' %}" class="btn btn-sm btn-outline-secondary mb-3">
+        ← Volver al panel
+      </a>
+      <h1 class="h3 fw-bold mb-1">Detalle del pedido</h1>
+      <p class="text-muted mb-0">{{ pedido.codigo_pedido }}</p>
+    </div>
+
+    <div class="text-md-end">
+      <span class="badge rounded-pill {{ pedido.badge_class }} fs-6">
+        {{ pedido.get_estado_display }}
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold mb-3">Datos del cliente</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Nombre</p>
+              <p class="fw-semibold mb-0">{{ pedido.nombre }}</p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Correo</p>
+              <p class="fw-semibold mb-0">{{ pedido.email }}</p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Teléfono</p>
+              <p class="fw-semibold mb-0">
+                {% if pedido.telefono %}
+                  {{ pedido.telefono }}
+                {% else %}
+                  No especificado
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Fecha del pedido</p>
+              <p class="fw-semibold mb-0">{{ pedido.creado|date:"d/m/Y H:i" }}</p>
+            </div>
+
+            <div class="col-12">
+              <p class="mb-1 text-muted small">Dirección</p>
+              <p class="fw-semibold mb-0">
+                {% if pedido.direccion %}
+                  {{ pedido.direccion }}
+                {% else %}
+                  No especificada
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Fecha del evento / entrega</p>
+              <p class="fw-semibold mb-0">
+                {% if pedido.fecha_evento %}
+                  {{ pedido.fecha_evento|date:"d/m/Y" }}
+                {% else %}
+                  No especificada
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="col-12">
+              <p class="mb-1 text-muted small">Detalles</p>
+              <p class="fw-semibold mb-0">
+                {% if pedido.detalles %}
+                  {{ pedido.detalles|linebreaksbr }}
+                {% else %}
+                  Sin detalles adicionales
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0">Productos del pedido</h2>
+            <span class="text-muted small">
+              {{ pedido.cantidad_total_productos }} producto{{ pedido.cantidad_total_productos|pluralize:"s" }}
+            </span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio unitario</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for linea in lineas_pedido %}
+                  <tr>
+                    <td>{{ linea.nombre_producto }}</td>
+                    <td>{{ linea.cantidad }}</td>
+                    <td>{{ linea.precio_unitario|moneda }}</td>
+                    <td><strong>{{ linea.subtotal|moneda }}</strong></td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                      No hay productos registrados en este pedido.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end">Total</th>
+                  <th>{{ pedido.total|moneda }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold mb-3">Historial de cambios de estado</h2>
+
+          {% if historial_estados %}
+            <div class="d-flex flex-column gap-3">
+              {% for item in historial_estados %}
+                <div class="border rounded-4 p-3">
+                  <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-2">
+                    <div>
+                      <span class="fw-semibold">{{ item.get_estado_anterior_display }}</span>
+                      <span class="mx-1">→</span>
+                      <span class="fw-semibold">{{ item.get_estado_nuevo_display }}</span>
+                    </div>
+
+                    <small class="text-muted">
+                      {{ item.creado|date:"d/m/Y H:i" }}
+                    </small>
+                  </div>
+
+                  <p class="mb-1 small text-muted">
+                    Cambiado por:
+                    <strong>
+                      {% if item.cambiado_por %}
+                        {{ item.cambiado_por.get_full_name|default:item.cambiado_por.username }}
+                      {% else %}
+                        Sistema / cliente
+                      {% endif %}
+                    </strong>
+                  </p>
+
+                  {% if item.nota %}
+                    <p class="mb-0">{{ item.nota|linebreaksbr }}</p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">
+              Todavía no hay historial de cambios para este pedido.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold mb-3">Actualizar estado</h2>
+
+          {% if estados_disponibles %}
+            <form method="post" action="{% url 'pedidos:cambiar_estado_pedido' pedido.id %}">
+              {% csrf_token %}
+
+              <div class="mb-3">
+                <label for="estado" class="form-label fw-semibold">Nuevo estado</label>
+                <select name="estado" id="estado" class="form-select" required>
+                  <option value="">Selecciona un estado</option>
+                  {% for value, label in estados_disponibles %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="nota" class="form-label fw-semibold">Nota del cambio</label>
+                <textarea
+                  name="nota"
+                  id="nota"
+                  rows="4"
+                  class="form-control"
+                  placeholder="Opcional: agrega una observación"
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-dark w-100">
+                Guardar cambio
+              </button>
+            </form>
+          {% else %}
+            <p class="text-muted mb-0">
+              Este pedido ya no admite más cambios de estado.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% load moneda %}
+
+{% block title %}{{ producto.nombre }} - Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container my-5 detalle-section">
+  <div class="row g-5 align-items-start">
+    <div class="col-lg-6">
+      <div class="detalle-media-card shadow-sm">
+        {% if producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="detalle-main-img">
+        {% else %}
+          <div class="detalle-placeholder">Sin imagen disponible</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      {% if producto.categoria %}
+      <p class="mb-3">
+        <a href="{% url 'tienda:tienda_por_categoria' producto.categoria.slug %}" class="text-decoration-none">
+          <span class="detalle-chip">{{ producto.categoria.nombre }}</span>
+        </a>
+      </p>
+      {% endif %}
+
+      <h1 class="detalle-title fw-bold mb-3">{{ producto.nombre }}</h1>
+
+      {% if producto.destacado %}
+      <p class="mb-3">
+        <span class="detalle-badge">Producto destacado</span>
+      </p>
+      {% endif %}
+
+      <p class="detalle-description">{{ producto.descripcion }}</p>
+      <p class="detalle-price">{{ producto.precio|moneda }}</p>
+
+      <div class="carrito-acciones mt-4"
+        data-id="{{ producto.id }}"
+        data-url-add="{% url 'carrito:agregar_al_carrito' producto.id %}"
+        data-url-sub="{% url 'carrito:restar_producto' producto.id %}"
+        data-url-del="{% url 'carrito:eliminar_producto' producto.id %}"
+        data-cantidad="{{ producto.cant_en_carrito }}">
+
+        {% if producto.cant_en_carrito > 0 %}
+        {% else %}
+        <button class="btn btn-warning btn-agregar px-4 py-2">🛒 Agregar al carrito</button>
+        {% endif %}
+      </div>
+
+      <div class="mt-4">
+        <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-dark rounded-pill px-4">
+          ← Volver a la tienda
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if relacionados %}
+  <div class="mt-5 pt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+      <h3 class="fw-bold detalle-related-title mb-0">También te puede interesar</h3>
+      <span class="text-muted small">Productos relacionados</span>
+    </div>
+
+    <div class="row g-4">
+      {% for item in relacionados %}
+      <div class="col-md-6 col-lg-3">
+        <div class="card producto-rel-card h-100 shadow-sm border-0">
+          <div class="producto-rel-img-wrap">
+            <a href="{% url 'tienda:detalle_producto' item.slug %}">
+              {% if item.imagen %}
+                <img src="{{ item.imagen.url }}" class="producto-rel-img" alt="{{ item.nombre }}">
+              {% else %}
+                <div class="producto-rel-placeholder">Sin imagen</div>
+              {% endif %}
+            </a>
+          </div>
+
+          <div class="card-body text-center d-flex flex-column">
+            <h5 class="fw-bold mb-2">
+              <a href="{% url 'tienda:detalle_producto' item.slug %}" class="producto-rel-link">
+                {{ item.nombre }}
+              </a>
+            </h5>
+            <p class="small text-muted flex-grow-1">{{ item.descripcion|truncatechars:70 }}</p>
+            <p class="producto-rel-price mb-0">{{ item.precio|moneda }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const $$ = s => document.querySelectorAll(s);
+
+  async function refreshCounter() {
+    try {
+      const res = await fetch("{% url 'carrito:cantidad_carrito' %}");
+      const data = await res.json();
+      const badge = document.getElementById("contadorCarrito");
+      if (!badge) return;
+      badge.style.display = data.cantidad > 0 ? "inline-block" : "none";
+      badge.textContent = data.cantidad;
+    } catch (e) {
+      console.error("Error contador:", e);
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast-msg";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  async function hit(url) {
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    window.dispatchEvent(new Event("carrito-actualizado"));
+    return res;
+  }
+
+  function pintarControles(zone, cant) {
+    zone.dataset.cantidad = cant;
+    zone.innerHTML = `
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-outline-secondary btn-restar">-</button>
+        <input type="number" min="1" class="form-control cant-input text-center"
+               value="${cant}" style="width:90px;">
+        <button class="btn btn-outline-secondary btn-sumar">+</button>
+        <button class="btn btn-danger btn-borrar">🗑</button>
+      </div>
+      <p class="text-muted small mt-2 mb-0">En carrito: <span class="cant-label">${cant}</span></p>
+    `;
+    activarEventos(zone);
+    refreshCounter();
+  }
+
+  function activarEventos(zone) {
+    const urlAdd = zone.dataset.urlAdd;
+    const urlSub = zone.dataset.urlSub;
+    const urlDel = zone.dataset.urlDel;
+
+    const btnAgregar = zone.querySelector(".btn-agregar");
+    const btnSum = zone.querySelector(".btn-sumar");
+    const btnRes = zone.querySelector(".btn-restar");
+    const btnDel = zone.querySelector(".btn-borrar");
+    const input = zone.querySelector(".cant-input");
+    const label = zone.querySelector(".cant-label");
+
+    if (btnAgregar) {
+      btnAgregar.onclick = async e => {
+        e.preventDefault();
+        await hit(urlAdd);
+        pintarControles(zone, 1);
+        showToast("✅ Producto añadido al carrito");
+      };
+    }
+
+    if (btnSum) {
+      btnSum.onclick = async () => {
+        await hit(urlAdd);
+        const nueva = +input.value + 1;
+        input.value = nueva;
+        zone.dataset.cantidad = nueva;
+        label.textContent = nueva;
+        refreshCounter();
+      };
+    }
+
+    if (btnRes) {
+      btnRes.onclick = async () => {
+        if (+input.value <= 1) {
+          await hit(urlDel);
+          zone.innerHTML = `<button class="btn btn-warning btn-agregar px-4 py-2">🛒 Agregar al carrito</button>`;
+          zone.dataset.cantidad = 0;
+          activarEventos(zone);
+          refreshCounter();
+        } else {
+          await hit(urlSub);
+          const nueva = +input.value - 1;
+          input.value = nueva;
+          zone.dataset.cantidad = nueva;
+          label.textContent = nueva;
+          refreshCounter();
+        }
+      };
+    }
+
+    if (btnDel) {
+      btnDel.onclick = async () => {
+        await hit(urlDel);
+        zone.innerHTML = `<button class="btn btn-warning btn-agregar px-4 py-2">🛒 Agregar al carrito</button>`;
+        zone.dataset.cantidad = 0;
+        activarEventos(zone);
+        refreshCounter();
+      };
+    }
+  }
+
+  $$(".carrito-acciones").forEach(zone => {
+    const cant = Number(zone.dataset.cantidad);
+    cant > 0 ? pintarControles(zone, cant) : activarEventos(zone);
+  });
+});
+</script>
+
+<style>
+.detalle-section {
+  color: #4a2c13;
+}
+
+.detalle-media-card {
+  background: #fff;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid #f0dfd3;
+}
+
+.detalle-main-img {
+  width: 100%;
+  height: 460px;
+  object-fit: cover;
+  display: block;
+}
+
+.detalle-placeholder {
+  height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7e5db, #f1d3c3);
+  color: #8a5a3b;
+  font-weight: 700;
+}
+
+.detalle-chip {
+  display: inline-block;
+  background: #f8f2ed;
+  color: #7a4c2f;
+  border: 1px solid #ead6c8;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.detalle-title {
+  color: #5a2a00;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.detalle-badge {
+  display: inline-block;
+  background: #ffb38a;
+  color: #5a2a00;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.detalle-description {
+  font-size: 1.08rem;
+  color: #6f5a4f;
+  line-height: 1.8;
+}
+
+.detalle-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #5a2a00;
+  margin-bottom: 0;
+}
+
+.detalle-related-title {
+  color: #5a2a00;
+}
+
+.producto-rel-card {
+  border-radius: 22px;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+  background: #fff;
+}
+
+.producto-rel-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.12) !important;
+}
+
+.producto-rel-img-wrap {
+  overflow: hidden;
+}
+
+.producto-rel-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform .35s ease;
+}
+
+.producto-rel-card:hover .producto-rel-img {
+  transform: scale(1.04);
+}
+
+.producto-rel-placeholder {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7e5db, #f1d3c3);
+  color: #8a5a3b;
+  font-weight: 700;
+}
+
+.producto-rel-link {
+  color: #5a2a00;
+  text-decoration: none;
+}
+
+.producto-rel-link:hover {
+  color: #d56b38;
+}
+
+.producto-rel-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #5a2a00;
+}
+
+.toast-msg {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff8c42;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  animation: toastAnim 2.5s forwards;
+  z-index: 2000;
+}
+
+@keyframes toastAnim {
+  0% { opacity: 0; transform: translateY(15px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(15px); }
+}
+</style>
+{% endblock %}

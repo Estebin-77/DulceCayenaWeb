@@ -2,26 +2,164 @@
 {% load static %}
 {% load moneda %}
 
-{% block title %}Tienda - Dulce Cayena{% endblock %}
+{% block title %}
+  {% if categoria_actual %}
+    {{ categoria_actual.nombre }} - Tienda - Dulce Cayena
+  {% else %}
+    Tienda - Dulce Cayena
+  {% endif %}
+{% endblock %}
 
 {% block content %}
-<section class="container my-5">
-  <h2 class="text-center fw-bold mb-4" style="color:#5a2a00;">🧁 Nuestros productos</h2>
+<section class="container my-5 tienda-section">
+  <div class="text-center mb-5">
+    <span class="tienda-kicker">Catálogo artesanal</span>
+    <h2 class="fw-bold tienda-title mt-2">🧁 Nuestra tienda</h2>
+    <p class="text-muted mb-0 tienda-subtitle">
+      Descubre nuestros productos artesanales y elige tus favoritos.
+    </p>
+  </div>
+
+  {% if destacados and not categoria_actual %}
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h3 class="fw-bold mb-0 tienda-section-title">✨ Productos destacados</h3>
+      <span class="text-muted small">Selección especial de Dulce Cayena</span>
+    </div>
+
+    <div class="row g-4">
+      {% for producto in destacados %}
+      <div class="col-md-6 col-lg-3">
+        <div class="card producto-card producto-card-destacado shadow-sm border-0 h-100">
+          <div class="producto-img-wrap">
+            <a href="{% url 'tienda:detalle_producto' producto.slug %}">
+              {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
+              {% else %}
+                <div class="producto-placeholder">Sin imagen</div>
+              {% endif %}
+            </a>
+            <span class="producto-badge producto-badge-destacado">Destacado</span>
+          </div>
+
+          <div class="card-body text-center d-flex flex-column">
+            {% if producto.categoria %}
+            <p class="mb-2">
+              <span class="producto-chip">{{ producto.categoria.nombre }}</span>
+            </p>
+            {% endif %}
+
+            <h5 class="card-title fw-bold mb-2">
+              <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="producto-link">
+                {{ producto.nombre }}
+              </a>
+            </h5>
+
+            <p class="card-text text-muted small flex-grow-1">
+              {{ producto.descripcion|truncatechars:80 }}
+            </p>
+
+            <p class="producto-price mb-3">{{ producto.precio|moneda }}</p>
+
+            <div class="d-flex justify-content-center mb-3">
+              <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                Ver detalle
+              </a>
+            </div>
+
+            <div class="carrito-acciones"
+              data-id="{{ producto.id }}"
+              data-url-add="{% url 'carrito:agregar_al_carrito' producto.id %}"
+              data-url-sub="{% url 'carrito:restar_producto' producto.id %}"
+              data-url-del="{% url 'carrito:eliminar_producto' producto.id %}"
+              data-cantidad="{{ producto.cant_en_carrito }}">
+
+              {% if producto.cant_en_carrito > 0 %}
+              {% else %}
+              <button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mb-4">
+    <h4 class="fw-bold mb-3 tienda-section-title">Categorías</h4>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'tienda:tienda' %}"
+         class="btn {% if not categoria_actual %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3">
+        Todas
+      </a>
+
+      {% for categoria in categorias %}
+      <a href="{% url 'tienda:tienda_por_categoria' categoria.slug %}"
+         class="btn {% if categoria_actual and categoria_actual.id == categoria.id %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3">
+        {{ categoria.nombre }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h3 class="fw-bold mb-0 tienda-section-title">
+      {% if categoria_actual %}
+        {{ categoria_actual.nombre }}
+      {% else %}
+        Todos los productos
+      {% endif %}
+    </h3>
+    <span class="text-muted">{{ productos|length }} producto{{ productos|length|pluralize }}</span>
+  </div>
 
   {% if productos %}
-  <div class="row">
+  <div class="row g-4">
     {% for producto in productos %}
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm h-100">
+    <div class="col-md-6 col-lg-4">
+      <div class="card producto-card shadow-sm border-0 h-100">
 
-        {% if producto.imagen %}
-        <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
-        {% endif %}
+        <div class="producto-img-wrap">
+          <a href="{% url 'tienda:detalle_producto' producto.slug %}">
+            {% if producto.imagen %}
+              <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
+            {% else %}
+              <div class="producto-placeholder">Sin imagen</div>
+            {% endif %}
+          </a>
 
-        <div class="card-body text-center">
-          <h5 class="card-title fw-bold">{{ producto.nombre }}</h5>
-          <p class="card-text">{{ producto.descripcion|truncatechars:100 }}</p>
-          <p class="fw-bold" style="color:#5a2a00;">{{ producto.precio|moneda }}</p>
+          {% if producto.destacado %}
+          <span class="producto-badge producto-badge-destacado">Destacado</span>
+          {% endif %}
+        </div>
+
+        <div class="card-body text-center d-flex flex-column">
+          <div class="mb-2">
+            {% if producto.categoria %}
+              <span class="producto-chip">{{ producto.categoria.nombre }}</span>
+            {% endif %}
+          </div>
+
+          <h5 class="card-title fw-bold mb-2">
+            <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="producto-link">
+              {{ producto.nombre }}
+            </a>
+          </h5>
+
+          <p class="card-text text-muted flex-grow-1">
+            {{ producto.descripcion|truncatechars:100 }}
+          </p>
+
+          <p class="producto-price mb-3">{{ producto.precio|moneda }}</p>
+
+          <div class="d-flex justify-content-center mb-3">
+            <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+              Ver detalle
+            </a>
+          </div>
 
           <div class="carrito-acciones"
             data-id="{{ producto.id }}"
@@ -29,9 +167,8 @@
             data-url-sub="{% url 'carrito:restar_producto' producto.id %}"
             data-url-del="{% url 'carrito:eliminar_producto' producto.id %}"
             data-cantidad="{{ producto.cant_en_carrito }}">
-            
+
             {% if producto.cant_en_carrito > 0 %}
-            <!-- El JS pintará el control completo -->
             {% else %}
             <button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>
             {% endif %}
@@ -42,19 +179,20 @@
     </div>
     {% endfor %}
   </div>
-
   {% else %}
-  <p class="text-center text-muted mt-4">No hay productos disponibles por el momento.</p>
+  <div class="text-center py-5">
+    <div class="producto-empty-box mx-auto">
+      <h5 class="fw-bold mb-2">No hay productos disponibles</h5>
+      <p class="text-muted mb-0">Intenta con otra categoría o vuelve más tarde.</p>
+    </div>
+  </div>
   {% endif %}
 </section>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
   const $$ = s => document.querySelectorAll(s);
 
-  // ✅ Actualizar badge global del carrito
   async function refreshCounter() {
     try {
       const res = await fetch("{% url 'carrito:cantidad_carrito' %}");
@@ -69,7 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ✅ Toast "Añadido al carrito"
   function showToast(msg) {
     const t = document.createElement("div");
     t.className = "toast-msg";
@@ -80,23 +217,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function hit(url) {
     const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-
-    // 🔔 Notificar a TODO el sistema que el carrito cambió
     window.dispatchEvent(new Event("carrito-actualizado"));
-
     return res;
   }
 
   function pintarControles(zone, cant) {
+    zone.dataset.cantidad = cant;
     zone.innerHTML = `
-      <div class="d-flex justify-content-center align-items-center gap-2">
+      <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
         <button class="btn btn-outline-secondary btn-restar">-</button>
         <input type="number" min="1" class="form-control cant-input text-center"
                value="${cant}" style="width:70px;">
         <button class="btn btn-outline-secondary btn-sumar">+</button>
         <button class="btn btn-danger btn-borrar">🗑</button>
       </div>
-      <p class="text-muted small mt-1">En carrito: <span class="cant-label">${cant}</span></p>
+      <p class="text-muted small mt-2 mb-0">En carrito: <span class="cant-label">${cant}</span></p>
     `;
     activarEventos(zone);
     refreshCounter();
@@ -119,7 +254,6 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         e.stopPropagation();
         await hit(urlAdd);
-
         pintarControles(zone, 1);
         showToast("✅ Producto añadido al carrito");
       };
@@ -130,6 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await hit(urlAdd);
         const nueva = +input.value + 1;
         input.value = nueva;
+        zone.dataset.cantidad = nueva;
         label.textContent = nueva;
         refreshCounter();
       };
@@ -140,12 +275,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (+input.value <= 1) {
           await hit(urlDel);
           zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
+          zone.dataset.cantidad = 0;
           activarEventos(zone);
           refreshCounter();
         } else {
           await hit(urlSub);
           const nueva = +input.value - 1;
           input.value = nueva;
+          zone.dataset.cantidad = nueva;
           label.textContent = nueva;
           refreshCounter();
         }
@@ -156,82 +293,141 @@ document.addEventListener("DOMContentLoaded", () => {
       btnDel.onclick = async () => {
         await hit(urlDel);
         zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
+        zone.dataset.cantidad = 0;
         activarEventos(zone);
         refreshCounter();
       };
     }
-
-    // ✅ NUEVO: Evento para cuando el usuario escribe en el input
-    if (input) {
-      let timeoutId;
-      
-      input.addEventListener('input', (e) => {
-        clearTimeout(timeoutId);
-        
-        // Usar timeout para no hacer muchas peticiones mientras el usuario escribe
-        timeoutId = setTimeout(async () => {
-          const nuevaCantidad = parseInt(input.value);
-          
-          // Validar que sea un número válido y mayor a 0
-          if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
-            // Si no es válido, restaurar el valor anterior
-            input.value = zone.dataset.cantidad;
-            return;
-          }
-          
-          const cantidadActual = parseInt(zone.dataset.cantidad);
-          
-          if (nuevaCantidad > cantidadActual) {
-            // Si aumentó la cantidad, agregar la diferencia
-            const diferencia = nuevaCantidad - cantidadActual;
-            for (let i = 0; i < diferencia; i++) {
-              await hit(urlAdd);
-            }
-          } else if (nuevaCantidad < cantidadActual) {
-            // Si disminuyó la cantidad, restar la diferencia
-            const diferencia = cantidadActual - nuevaCantidad;
-            for (let i = 0; i < diferencia; i++) {
-              await hit(urlSub);
-            }
-          }
-          
-          // Actualizar el dataset y el label
-          zone.dataset.cantidad = nuevaCantidad;
-          if (label) {
-            label.textContent = nuevaCantidad;
-          }
-          
-          refreshCounter();
-          showToast("✅ Cantidad actualizada");
-          
-        }, 500); // Esperar 500ms después de que el usuario deje de escribir
-      });
-
-      // También actualizar cuando el input pierde el foco
-      input.addEventListener('blur', (e) => {
-        const nuevaCantidad = parseInt(input.value);
-        
-        if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
-          input.value = 1;
-          zone.dataset.cantidad = 1;
-          if (label) {
-            label.textContent = 1;
-          }
-        }
-      });
-    }
   }
 
-  $$(`.carrito-acciones`).forEach(zone => {
+  $$(".carrito-acciones").forEach(zone => {
     const cant = Number(zone.dataset.cantidad);
     cant > 0 ? pintarControles(zone, cant) : activarEventos(zone);
   });
-
 });
 </script>
 
-
 <style>
+.tienda-section {
+  color: #4a2c13;
+}
+
+.tienda-kicker {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: #fff1e7;
+  color: #b85c2d;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.tienda-title,
+.tienda-section-title {
+  color: #5a2a00;
+}
+
+.tienda-subtitle {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.producto-card {
+  border-radius: 22px;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+  background: #fff;
+}
+
+.producto-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.12) !important;
+}
+
+.producto-card-destacado {
+  background: linear-gradient(180deg, #fffaf7 0%, #ffffff 100%);
+}
+
+.producto-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.producto-img {
+  height: 240px;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .35s ease;
+}
+
+.producto-card:hover .producto-img {
+  transform: scale(1.04);
+}
+
+.producto-placeholder {
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7e5db, #f1d3c3);
+  color: #8a5a3b;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.producto-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.producto-badge-destacado {
+  background: #ffb38a;
+  color: #5a2a00;
+  box-shadow: 0 6px 14px rgba(255, 179, 138, .35);
+}
+
+.producto-chip {
+  display: inline-block;
+  background: #f8f2ed;
+  color: #7a4c2f;
+  border: 1px solid #ead6c8;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.producto-link {
+  color: #5a2a00;
+  text-decoration: none;
+}
+
+.producto-link:hover {
+  color: #d56b38;
+}
+
+.producto-price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #5a2a00;
+}
+
+.producto-empty-box {
+  max-width: 520px;
+  background: #fff;
+  border: 1px solid #f0dfd3;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.05);
+}
+
 .toast-msg {
   position: fixed;
   bottom: 20px;
@@ -243,6 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
   font-weight: 500;
   box-shadow: 0 2px 10px rgba(0,0,0,.25);
   animation: toastAnim 2.5s forwards;
+  z-index: 2000;
 }
 
 @keyframes toastAnim {
@@ -251,5 +448,4 @@ document.addEventListener("DOMContentLoaded", () => {
   100% { opacity: 0; transform: translateY(15px); }
 }
 </style>
-
 {% endblock %}

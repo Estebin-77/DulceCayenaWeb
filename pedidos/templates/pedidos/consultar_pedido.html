@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Consultar pedido | Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+
+      <div class="card shadow-sm border-0 rounded-4 consulta-pedido-card">
+        <div class="card-body p-4 p-md-5">
+
+          <!-- Encabezado -->
+          <div class="text-center mb-4">
+            <h1 class="h3 fw-bold mb-2">Consultar pedido</h1>
+            <p class="text-muted mb-0">
+              Ingresa el código de tu pedido y el correo electrónico con el que realizaste la compra.
+            </p>
+          </div>
+
+          <!-- Aviso de datos autocompletados -->
+          {% if datos_prefill %}
+            <div class="alert alerta-prefill rounded-4 border-0 shadow-sm mb-4" role="alert">
+              <strong>Hemos completado estos datos por ti.</strong>
+              Solo revisa la información y pulsa <strong>Consultar estado</strong>.
+            </div>
+          {% endif %}
+
+          <!-- Mensajes -->
+          {% if messages %}
+            <div class="mb-3">
+              {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}warning{% endif %} rounded-3 shadow-sm mb-2">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <!-- Formulario -->
+          <form method="post" novalidate class="consulta-form">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="codigo" class="form-label fw-semibold">Código del pedido</label>
+              <input
+                type="text"
+                name="codigo"
+                id="codigo"
+                class="form-control form-control-lg"
+                placeholder="Ej: DC-0025-2026"
+                value="{{ codigo_inicial|default:'' }}"
+                required
+              >
+              <div class="form-text">
+                Puedes encontrar este código en tu confirmación del pedido.
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="form-control form-control-lg"
+                placeholder="tucorreo@ejemplo.com"
+                value="{{ email_inicial|default:'' }}"
+                required
+              >
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-consultar btn-lg rounded-3">
+                Consultar estado
+              </button>
+            </div>
+          </form>
+
+          <!-- Bloque de ayuda -->
+          <div class="consulta-ayuda mt-4">
+            <h2 class="h6 fw-bold mb-2">¿No encuentras tu pedido?</h2>
+            <p class="text-muted mb-0">
+              Verifica que el código y el correo coincidan exactamente con los datos usados al realizar la compra.
+              Si el problema continúa, contáctanos y con gusto te ayudaremos.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .consulta-pedido-card {
+    background: #ffffff;
+  }
+
+  .alerta-prefill {
+    background: #fff7f2;
+    color: #6b4b3a;
+    border: 1px solid #ffd8bd;
+  }
+
+  .consulta-form .form-label {
+    color: #5b3b2d;
+  }
+
+  .consulta-form .form-control {
+    border-radius: 0.9rem;
+    border: 1px solid #ead8cb;
+    padding: 0.9rem 1rem;
+    background-color: #fffdfb;
+    color: #4a2e1f;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .consulta-form .form-control:focus {
+    border-color: #ffb27d;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 66, 0.15);
+    background-color: #ffffff;
+  }
+
+  .consulta-form .form-text {
+    color: #8a7b70;
+  }
+
+  .btn-consultar {
+    background-color: #ff8c42;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.9rem 1.2rem;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-consultar:hover {
+    background-color: #f07d31;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(255, 140, 66, 0.18);
+  }
+
+  .btn-consultar:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 66, 0.25);
+  }
+
+  .consulta-ayuda {
+    background: #fff7f2;
+    border: 1px dashed #f0c9a7;
+    border-radius: 1rem;
+    padding: 1rem 1.1rem;
+  }
+
+  @media (max-width: 576px) {
+    .consulta-form .form-control {
+      padding: 0.85rem 0.95rem;
+    }
+
+    .btn-consultar {
+      padding: 0.85rem 1rem;
+    }
+  }
+</style>
+{% endblock %}

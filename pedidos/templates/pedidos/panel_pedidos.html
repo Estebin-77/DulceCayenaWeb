@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load moneda %}
+
+{% block title %}Panel de pedidos | Dulce Cayena{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Panel de pedidos</h1>
+      <p class="text-muted mb-0">Gestiona y consulta los pedidos recibidos.</p>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-12 col-md-6">
+          <label for="q" class="form-label fw-semibold">Buscar</label>
+          <input
+            type="text"
+            name="q"
+            id="q"
+            class="form-control"
+            placeholder="Código, nombre o email"
+            value="{{ q }}"
+          >
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="estado" class="form-label fw-semibold">Estado</label>
+          <select name="estado" id="estado" class="form-select">
+            <option value="">Todos</option>
+            {% for value, label in estados %}
+              <option value="{{ value }}" {% if estado_actual == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12 col-md-3 d-grid d-md-flex gap-2">
+          <button type="submit" class="btn btn-dark w-100">
+            Filtrar
+          </button>
+          <a href="{% url 'pedidos:panel_pedidos' %}" class="btn btn-outline-secondary w-100">
+            Limpiar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="mb-0 text-muted">
+      Resultados: <strong>{{ total_resultados }}</strong>
+    </p>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="px-4 py-3">Pedido</th>
+            <th class="py-3">Cliente</th>
+            <th class="py-3">Fecha</th>
+            <th class="py-3">Total</th>
+            <th class="py-3">Estado</th>
+            <th class="text-end px-4 py-3">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pedido in pedidos %}
+            <tr>
+              <td class="px-4">
+                <div class="fw-semibold">{{ pedido.codigo_pedido }}</div>
+                <small class="text-muted">
+                  {{ pedido.creado|date:"d/m/Y H:i" }}
+                </small>
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ pedido.nombre }}</div>
+                <small class="text-muted">{{ pedido.email }}</small>
+              </td>
+
+              <td>
+                {{ pedido.creado|date:"d/m/Y" }}
+              </td>
+
+              <td>
+                <strong>{{ pedido.total|moneda }}</strong>
+              </td>
+
+              <td>
+                <span class="badge rounded-pill {{ pedido.badge_class }}">
+                  {{ pedido.get_estado_display }}
+                </span>
+              </td>
+
+              <td class="text-end px-4">
+                <a href="{% url 'pedidos:panel_pedido_detalle' pedido.id %}" class="btn btn-sm btn-outline-dark">
+                  Gestionar
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <p class="mb-1 fw-semibold">No se encontraron pedidos.</p>
+                <p class="text-muted mb-0">Prueba con otro filtro o búsqueda.</p>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="mt-4" aria-label="Paginación de pedidos">
+      <ul class="pagination justify-content-center mb-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?q={{ q }}&estado={{ estado_actual }}&page={{ page_obj.previous_page_number }}"
+            >
+              Anterior
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Anterior</span>
+          </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?q={{ q }}&estado={{ estado_actual }}&page={{ num }}"
+              >
+                {{ num }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?q={{ q }}&estado={{ estado_actual }}&page={{ page_obj.next_page_number }}"
+            >
+              Siguiente
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Siguiente</span>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}
