@@ -13,6 +13,7 @@
 
   <!-- CSS Personalizado -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
   <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
 </head>
 
@@ -121,5 +122,6 @@
     });
   </script>
 
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

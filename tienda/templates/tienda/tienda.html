@@ -10,29 +10,97 @@
   {% endif %}
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tienda.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="container my-5 tienda-section">
-  <div class="text-center mb-5">
-    <span class="tienda-kicker">Catálogo artesanal</span>
-    <h2 class="fw-bold tienda-title mt-2">🧁 Nuestra tienda</h2>
-    <p class="text-muted mb-0 tienda-subtitle">
-      Descubre nuestros productos artesanales y elige tus favoritos.
-    </p>
+<section class="container my-5 tienda-section" data-url-cantidad-carrito="{% url 'carrito:cantidad_carrito' %}">
+  <div class="tienda-hero mb-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <div class="tienda-hero-content">
+          <span class="tienda-kicker">Catálogo artesanal</span>
+
+          {% if categoria_actual %}
+          <div class="mt-3 mb-2">
+            <a href="{% url 'tienda:tienda' %}" class="tienda-breadcrumb-link">
+              Tienda
+            </a>
+            <span class="tienda-breadcrumb-sep">/</span>
+            <span class="tienda-breadcrumb-current">{{ categoria_actual.nombre }}</span>
+          </div>
+          {% endif %}
+
+          <h1 class="fw-bold tienda-title mt-2 mb-3">
+            {{ hero_titulo }}
+          </h1>
+
+          <p class="tienda-subtitle mb-4">
+            {{ hero_descripcion }}
+          </p>
+
+          <div class="tienda-hero-actions d-flex flex-wrap gap-2">
+            <a href="#catalogo-productos" class="btn btn-dark rounded-pill px-4 py-2">
+              Ver productos
+            </a>
+
+            {% if categoria_actual or busqueda_actual or orden_actual != "relevancia" %}
+            <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-dark rounded-pill px-4 py-2">
+              Ver toda la tienda
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="tienda-hero-card shadow-sm">
+          <div class="tienda-hero-stat-row">
+            <div class="tienda-hero-stat">
+              <span class="tienda-hero-stat-number">{{ total_productos }}</span>
+              <span class="tienda-hero-stat-label">productos visibles</span>
+            </div>
+
+            <div class="tienda-hero-stat-divider"></div>
+
+            <div class="tienda-hero-stat">
+              <span class="tienda-hero-stat-number">{{ total_categorias }}</span>
+              <span class="tienda-hero-stat-label">categorías activas</span>
+            </div>
+          </div>
+
+          <div class="tienda-hero-divider"></div>
+
+          <p class="tienda-hero-summary mb-3">
+            {{ bloque_resumen }}
+          </p>
+
+          <div class="tienda-hero-note">
+            <strong>Dulce Cayena</strong> reúne productos artesanales pensados para compartir,
+            regalar y disfrutar en ocasiones especiales.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  {% if destacados and not categoria_actual %}
+  {% if destacados and not categoria_actual and not busqueda_actual %}
   <div class="mb-5">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <h3 class="fw-bold mb-0 tienda-section-title">✨ Productos destacados</h3>
-      <span class="text-muted small">Selección especial de Dulce Cayena</span>
+    <div class="tienda-block-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <p class="tienda-block-kicker mb-1">Selección especial</p>
+        <h2 class="fw-bold mb-0 tienda-section-title">Productos destacados</h2>
+      </div>
+      <span class="text-muted small">Lo más especial de Dulce Cayena</span>
     </div>
 
     <div class="row g-4">
       {% for producto in destacados %}
       <div class="col-md-6 col-lg-3">
-        <div class="card producto-card producto-card-destacado shadow-sm border-0 h-100">
+        <article class="card producto-card producto-card-destacado shadow-sm border-0 h-100">
           <div class="producto-img-wrap">
-            <a href="{% url 'tienda:detalle_producto' producto.slug %}">
+            <a href="{% url 'tienda:detalle_producto' producto.slug %}" aria-label="Ver detalle de {{ producto.nombre }}">
               {% if producto.imagen %}
                 <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
               {% else %}
@@ -42,21 +110,21 @@
             <span class="producto-badge producto-badge-destacado">Destacado</span>
           </div>
 
-          <div class="card-body text-center d-flex flex-column">
+          <div class="card-body producto-card-body text-center d-flex flex-column">
             {% if producto.categoria %}
             <p class="mb-2">
               <span class="producto-chip">{{ producto.categoria.nombre }}</span>
             </p>
             {% endif %}
 
-            <h5 class="card-title fw-bold mb-2">
+            <h3 class="card-title producto-card-title fw-bold mb-2">
               <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="producto-link">
                 {{ producto.nombre }}
               </a>
-            </h5>
+            </h3>
 
-            <p class="card-text text-muted small flex-grow-1">
-              {{ producto.descripcion|truncatechars:80 }}
+            <p class="card-text text-muted small producto-desc flex-grow-1">
+              {{ producto.descripcion|truncatechars:85 }}
             </p>
 
             <p class="producto-price mb-3">{{ producto.precio|moneda }}</p>
@@ -80,50 +148,135 @@
               {% endif %}
             </div>
           </div>
-        </div>
+        </article>
       </div>
       {% endfor %}
     </div>
   </div>
   {% endif %}
 
-  <div class="mb-4">
-    <h4 class="fw-bold mb-3 tienda-section-title">Categorías</h4>
+  <div class="tienda-categorias-box mb-5">
+    <div class="tienda-block-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <p class="tienda-block-kicker mb-1">Explora por tipo</p>
+        <h2 class="fw-bold mb-0 tienda-section-title">Categorías</h2>
+      </div>
+      <span class="text-muted small">{{ total_categorias }} activas</span>
+    </div>
 
     <div class="d-flex flex-wrap gap-2">
-      <a href="{% url 'tienda:tienda' %}"
-         class="btn {% if not categoria_actual %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3">
-        Todas
+      <a href="{% url 'tienda:tienda' %}{% if busqueda_actual or orden_actual != 'relevancia' %}?{% endif %}{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}{% endif %}{% if busqueda_actual and orden_actual != 'relevancia' %}&{% endif %}{% if orden_actual != 'relevancia' %}orden={{ orden_actual|urlencode }}{% endif %}"
+         class="btn categoria-btn {% if not categoria_actual %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3 py-2">
+        <span>Todas</span>
       </a>
 
       {% for categoria in categorias %}
-      <a href="{% url 'tienda:tienda_por_categoria' categoria.slug %}"
-         class="btn {% if categoria_actual and categoria_actual.id == categoria.id %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3">
-        {{ categoria.nombre }}
+      <a href="{% url 'tienda:tienda_por_categoria' categoria.slug %}{% if busqueda_actual or orden_actual != 'relevancia' %}?{% endif %}{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}{% endif %}{% if busqueda_actual and orden_actual != 'relevancia' %}&{% endif %}{% if orden_actual != 'relevancia' %}orden={{ orden_actual|urlencode }}{% endif %}"
+         class="btn categoria-btn {% if categoria_actual and categoria_actual.id == categoria.id %}btn-dark{% else %}btn-outline-dark{% endif %} rounded-pill px-3 py-2">
+        <span>{{ categoria.nombre }}</span>
+        <span class="categoria-count">{{ categoria.productos_disponibles }}</span>
       </a>
       {% endfor %}
     </div>
   </div>
 
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h3 class="fw-bold mb-0 tienda-section-title">
-      {% if categoria_actual %}
-        {{ categoria_actual.nombre }}
-      {% else %}
-        Todos los productos
-      {% endif %}
-    </h3>
-    <span class="text-muted">{{ productos|length }} producto{{ productos|length|pluralize }}</span>
+  <div id="catalogo-productos" class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <p class="tienda-block-kicker mb-1">Catálogo disponible</p>
+      <h2 class="fw-bold mb-0 tienda-section-title">
+        {% if categoria_actual %}
+          {{ categoria_actual.nombre }}
+        {% elif busqueda_actual %}
+          Resultados de búsqueda
+        {% else %}
+          Todos los productos
+        {% endif %}
+      </h2>
+    </div>
+
+    <span class="tienda-results-count">
+      {{ etiqueta_resultados }}
+    </span>
+  </div>
+
+  <div class="tienda-filtros-box mb-4">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-lg-6">
+        <label for="id_q" class="form-label fw-semibold">Buscar productos</label>
+        <input
+          type="text"
+          name="q"
+          id="id_q"
+          class="form-control"
+          placeholder="Ej.: brownie, cupcake, galletas, chocolate..."
+          value="{{ busqueda_actual }}"
+        >
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <label for="id_orden" class="form-label fw-semibold">Ordenar por</label>
+        <select name="orden" id="id_orden" class="form-select">
+          {% for value, label in opciones_orden %}
+          <option value="{{ value }}" {% if orden_actual == value %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-dark rounded-pill px-4">
+            Aplicar
+          </button>
+
+          {% if categoria_actual or busqueda_actual or orden_actual != "relevancia" %}
+          <a href="{% if categoria_actual %}{% url 'tienda:tienda_por_categoria' categoria_actual.slug %}{% else %}{% url 'tienda:tienda' %}{% endif %}" class="btn btn-outline-dark rounded-pill px-4">
+            Limpiar búsqueda
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+
+    {% if busqueda_actual or orden_actual != "relevancia" or categoria_actual %}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="tienda-filter-status">
+          {{ filtros_activos }} filtro{{ filtros_activos|pluralize }} activo{{ filtros_activos|pluralize }}
+        </span>
+
+        {% if busqueda_actual %}
+        <span class="producto-chip">Búsqueda: {{ busqueda_actual }}</span>
+        {% endif %}
+
+        {% if categoria_actual %}
+        <span class="producto-chip">Categoría: {{ categoria_actual.nombre }}</span>
+        {% endif %}
+
+        {% if orden_actual != "relevancia" %}
+          {% for value, label in opciones_orden %}
+            {% if orden_actual == value %}
+            <span class="producto-chip">Orden: {{ label }}</span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <a href="{% url 'tienda:tienda' %}" class="tienda-reset-link">
+        Quitar todos los filtros
+      </a>
+    </div>
+    {% endif %}
   </div>
 
   {% if productos %}
   <div class="row g-4">
     {% for producto in productos %}
     <div class="col-md-6 col-lg-4">
-      <div class="card producto-card shadow-sm border-0 h-100">
-
+      <article class="card producto-card shadow-sm border-0 h-100">
         <div class="producto-img-wrap">
-          <a href="{% url 'tienda:detalle_producto' producto.slug %}">
+          <a href="{% url 'tienda:detalle_producto' producto.slug %}" aria-label="Ver detalle de {{ producto.nombre }}">
             {% if producto.imagen %}
               <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
             {% else %}
@@ -136,20 +289,20 @@
           {% endif %}
         </div>
 
-        <div class="card-body text-center d-flex flex-column">
+        <div class="card-body producto-card-body text-center d-flex flex-column">
           <div class="mb-2">
             {% if producto.categoria %}
               <span class="producto-chip">{{ producto.categoria.nombre }}</span>
             {% endif %}
           </div>
 
-          <h5 class="card-title fw-bold mb-2">
+          <h3 class="card-title producto-card-title fw-bold mb-2">
             <a href="{% url 'tienda:detalle_producto' producto.slug %}" class="producto-link">
               {{ producto.nombre }}
             </a>
-          </h5>
+          </h3>
 
-          <p class="card-text text-muted flex-grow-1">
+          <p class="card-text text-muted producto-desc flex-grow-1">
             {{ producto.descripcion|truncatechars:100 }}
           </p>
 
@@ -174,278 +327,87 @@
             {% endif %}
           </div>
         </div>
-
-      </div>
+      </article>
     </div>
     {% endfor %}
   </div>
+  {% if is_paginated %}
+<nav class="tienda-pagination-wrap mt-5" aria-label="Paginación de productos">
+  <ul class="pagination justify-content-center flex-wrap gap-2 mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link tienda-page-link"
+         href="?{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}&{% endif %}{% if orden_actual %}orden={{ orden_actual|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">
+        ← Anterior
+      </a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <span class="page-link tienda-page-link">← Anterior</span>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num == page_obj.number %}
+      <li class="page-item active">
+        <span class="page-link tienda-page-link">{{ num }}</span>
+      </li>
+      {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+      <li class="page-item">
+        <a class="page-link tienda-page-link"
+           href="?{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}&{% endif %}{% if orden_actual %}orden={{ orden_actual|urlencode }}&{% endif %}page={{ num }}">
+          {{ num }}
+        </a>
+      </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link tienda-page-link"
+         href="?{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}&{% endif %}{% if orden_actual %}orden={{ orden_actual|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">
+        Siguiente →
+      </a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <span class="page-link tienda-page-link">Siguiente →</span>
+    </li>
+    {% endif %}
+  </ul>
+
+  <p class="text-center text-muted small mt-3 mb-0">
+    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+  </p>
+</nav>
+{% endif %}
   {% else %}
   <div class="text-center py-5">
     <div class="producto-empty-box mx-auto">
+      {% if busqueda_actual or categoria_actual or orden_actual != "relevancia" %}
+      <p class="tienda-block-kicker mb-2">Sin coincidencias</p>
+      <h5 class="fw-bold mb-2">No encontramos productos con esos filtros</h5>
+      <p class="text-muted mb-3">
+        Prueba con otra búsqueda, cambia el orden o explora otra categoría para descubrir más opciones.
+      </p>
+      <a href="{% url 'tienda:tienda' %}" class="btn btn-dark rounded-pill px-4">
+        Ver toda la tienda
+      </a>
+      {% else %}
+      <p class="tienda-block-kicker mb-2">Catálogo temporalmente vacío</p>
       <h5 class="fw-bold mb-2">No hay productos disponibles</h5>
-      <p class="text-muted mb-0">Intenta con otra categoría o vuelve más tarde.</p>
+      <p class="text-muted mb-3">Intenta con otra categoría o vuelve más tarde para ver nuevas opciones.</p>
+      <a href="{% url 'tienda:tienda' %}" class="btn btn-dark rounded-pill px-4">
+        Volver a la tienda
+      </a>
+      {% endif %}
     </div>
   </div>
   {% endif %}
 </section>
+{% endblock %}
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const $$ = s => document.querySelectorAll(s);
-
-  async function refreshCounter() {
-    try {
-      const res = await fetch("{% url 'carrito:cantidad_carrito' %}");
-      const data = await res.json();
-      const badge = document.getElementById("contadorCarrito");
-
-      if (!badge) return;
-      badge.style.display = data.cantidad > 0 ? "inline-block" : "none";
-      badge.textContent = data.cantidad;
-    } catch (e) {
-      console.error("Error contador:", e);
-    }
-  }
-
-  function showToast(msg) {
-    const t = document.createElement("div");
-    t.className = "toast-msg";
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
-  }
-
-  async function hit(url) {
-    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    window.dispatchEvent(new Event("carrito-actualizado"));
-    return res;
-  }
-
-  function pintarControles(zone, cant) {
-    zone.dataset.cantidad = cant;
-    zone.innerHTML = `
-      <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
-        <button class="btn btn-outline-secondary btn-restar">-</button>
-        <input type="number" min="1" class="form-control cant-input text-center"
-               value="${cant}" style="width:70px;">
-        <button class="btn btn-outline-secondary btn-sumar">+</button>
-        <button class="btn btn-danger btn-borrar">🗑</button>
-      </div>
-      <p class="text-muted small mt-2 mb-0">En carrito: <span class="cant-label">${cant}</span></p>
-    `;
-    activarEventos(zone);
-    refreshCounter();
-  }
-
-  function activarEventos(zone) {
-    const urlAdd = zone.dataset.urlAdd;
-    const urlSub = zone.dataset.urlSub;
-    const urlDel = zone.dataset.urlDel;
-
-    const btnAgregar = zone.querySelector(".btn-agregar");
-    const btnSum = zone.querySelector(".btn-sumar");
-    const btnRes = zone.querySelector(".btn-restar");
-    const btnDel = zone.querySelector(".btn-borrar");
-    const input = zone.querySelector(".cant-input");
-    const label = zone.querySelector(".cant-label");
-
-    if (btnAgregar) {
-      btnAgregar.onclick = async e => {
-        e.preventDefault();
-        e.stopPropagation();
-        await hit(urlAdd);
-        pintarControles(zone, 1);
-        showToast("✅ Producto añadido al carrito");
-      };
-    }
-
-    if (btnSum) {
-      btnSum.onclick = async () => {
-        await hit(urlAdd);
-        const nueva = +input.value + 1;
-        input.value = nueva;
-        zone.dataset.cantidad = nueva;
-        label.textContent = nueva;
-        refreshCounter();
-      };
-    }
-
-    if (btnRes) {
-      btnRes.onclick = async () => {
-        if (+input.value <= 1) {
-          await hit(urlDel);
-          zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
-          zone.dataset.cantidad = 0;
-          activarEventos(zone);
-          refreshCounter();
-        } else {
-          await hit(urlSub);
-          const nueva = +input.value - 1;
-          input.value = nueva;
-          zone.dataset.cantidad = nueva;
-          label.textContent = nueva;
-          refreshCounter();
-        }
-      };
-    }
-
-    if (btnDel) {
-      btnDel.onclick = async () => {
-        await hit(urlDel);
-        zone.innerHTML = `<button class="btn btn-warning btn-agregar">🛒 Agregar al carrito</button>`;
-        zone.dataset.cantidad = 0;
-        activarEventos(zone);
-        refreshCounter();
-      };
-    }
-  }
-
-  $$(".carrito-acciones").forEach(zone => {
-    const cant = Number(zone.dataset.cantidad);
-    cant > 0 ? pintarControles(zone, cant) : activarEventos(zone);
-  });
-});
-</script>
-
-<style>
-.tienda-section {
-  color: #4a2c13;
-}
-
-.tienda-kicker {
-  display: inline-block;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  background: #fff1e7;
-  color: #b85c2d;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.tienda-title,
-.tienda-section-title {
-  color: #5a2a00;
-}
-
-.tienda-subtitle {
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-.producto-card {
-  border-radius: 22px;
-  overflow: hidden;
-  transition: transform .25s ease, box-shadow .25s ease;
-  background: #fff;
-}
-
-.producto-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 30px rgba(0,0,0,.12) !important;
-}
-
-.producto-card-destacado {
-  background: linear-gradient(180deg, #fffaf7 0%, #ffffff 100%);
-}
-
-.producto-img-wrap {
-  position: relative;
-  overflow: hidden;
-}
-
-.producto-img {
-  height: 240px;
-  width: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .35s ease;
-}
-
-.producto-card:hover .producto-img {
-  transform: scale(1.04);
-}
-
-.producto-placeholder {
-  height: 240px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f7e5db, #f1d3c3);
-  color: #8a5a3b;
-  font-weight: 700;
-  letter-spacing: .3px;
-}
-
-.producto-badge {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 2;
-  border-radius: 999px;
-  padding: 0.35rem 0.8rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.producto-badge-destacado {
-  background: #ffb38a;
-  color: #5a2a00;
-  box-shadow: 0 6px 14px rgba(255, 179, 138, .35);
-}
-
-.producto-chip {
-  display: inline-block;
-  background: #f8f2ed;
-  color: #7a4c2f;
-  border: 1px solid #ead6c8;
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.producto-link {
-  color: #5a2a00;
-  text-decoration: none;
-}
-
-.producto-link:hover {
-  color: #d56b38;
-}
-
-.producto-price {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #5a2a00;
-}
-
-.producto-empty-box {
-  max-width: 520px;
-  background: #fff;
-  border: 1px solid #f0dfd3;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 10px 24px rgba(0,0,0,.05);
-}
-
-.toast-msg {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #ff8c42;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-weight: 500;
-  box-shadow: 0 2px 10px rgba(0,0,0,.25);
-  animation: toastAnim 2.5s forwards;
-  z-index: 2000;
-}
-
-@keyframes toastAnim {
-  0% { opacity: 0; transform: translateY(15px); }
-  10%, 90% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(15px); }
-}
-</style>
+{% block extra_js %}
+<script src="{% static 'js/public_carrito.js' %}"></script>
+<script src="{% static 'js/tienda.js' %}"></script>
 {% endblock %}
