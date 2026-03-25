@@ -352,7 +352,7 @@
       <li class="page-item active">
         <span class="page-link tienda-page-link">{{ num }}</span>
       </li>
-      {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+      {% else %}
       <li class="page-item">
         <a class="page-link tienda-page-link"
            href="?{% if busqueda_actual %}q={{ busqueda_actual|urlencode }}&{% endif %}{% if orden_actual %}orden={{ orden_actual|urlencode }}&{% endif %}page={{ num }}">
