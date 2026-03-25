@@ -85,6 +85,38 @@ def construir_textos_tienda(
     }
 
 
+def construir_paginas_visibles(page_obj):
+    total_paginas = page_obj.paginator.num_pages
+    pagina_actual = page_obj.number
+
+    if total_paginas <= 7:
+        return list(range(1, total_paginas + 1))
+
+    paginas = {1, total_paginas}
+
+    for numero in range(pagina_actual - 1, pagina_actual + 2):
+        if 1 <= numero <= total_paginas:
+            paginas.add(numero)
+
+    if pagina_actual <= 3:
+        paginas.update({2, 3, 4})
+    elif pagina_actual >= total_paginas - 2:
+        paginas.update({total_paginas - 3, total_paginas - 2, total_paginas - 1})
+
+    paginas_ordenadas = sorted(numero for numero in paginas if 1 <= numero <= total_paginas)
+
+    paginas_visibles = []
+    anterior = None
+
+    for numero in paginas_ordenadas:
+        if anterior is not None and numero - anterior > 1:
+            paginas_visibles.append(None)
+        paginas_visibles.append(numero)
+        anterior = numero
+
+    return paginas_visibles
+
+
 def tienda(request, categoria_slug=None):
     categoria_actual = None
     busqueda_actual = request.GET.get("q", "").strip()
@@ -202,6 +234,7 @@ def tienda(request, categoria_slug=None):
         ],
         "page_obj": page_obj,
         "is_paginated": page_obj.paginator.num_pages > 1,
+        "paginas_visibles": construir_paginas_visibles(page_obj),
         **textos,
     }
 

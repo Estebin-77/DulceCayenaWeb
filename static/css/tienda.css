@@ -557,3 +557,8 @@
     font-size: 0.92rem;
   }
 }
+
+.tienda-page-dots {
+  pointer-events: none;
+  min-width: 44px;
+}

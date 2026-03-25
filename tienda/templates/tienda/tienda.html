@@ -347,8 +347,12 @@
     </li>
     {% endif %}
 
-    {% for num in page_obj.paginator.page_range %}
-      {% if num == page_obj.number %}
+    {% for num in paginas_visibles %}
+      {% if num is None %}
+      <li class="page-item disabled">
+        <span class="page-link tienda-page-link tienda-page-dots">…</span>
+      </li>
+      {% elif num == page_obj.number %}
       <li class="page-item active">
         <span class="page-link tienda-page-link">{{ num }}</span>
       </li>
