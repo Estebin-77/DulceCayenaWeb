@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
 from tienda.models import Producto
@@ -16,6 +18,12 @@ class Pedido(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="pedidos",
+    )
+    token_acceso = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        db_index=True,
     )
 
     nombre = models.CharField(max_length=120)

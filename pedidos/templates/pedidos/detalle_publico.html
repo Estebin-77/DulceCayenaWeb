@@ -179,7 +179,7 @@
             <a href="{% url 'pedidos:consultar_pedido' %}" class="btn btn-principal btn-lg rounded-3">
               Consultar otro pedido
             </a>
-            <a href="{% url 'pedidos:descargar_pdf' pedido.id %}" class="btn btn-outline-secondary btn-lg rounded-3">
+            <a href="{% url 'pedidos:descargar_pdf' pedido.token_acceso %}" class="btn btn-outline-secondary btn-lg rounded-3">
               Descargar PDF
             </a>
             <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-dark btn-lg rounded-3">
