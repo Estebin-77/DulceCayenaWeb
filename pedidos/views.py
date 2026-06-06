@@ -171,7 +171,10 @@ def consultar_pedido(request):
                 break
 
         if pedido_encontrado:
-            return redirect("pedidos:detalle_publico", pedido_id=pedido_encontrado.id)
+            return redirect(
+                "pedidos:detalle_publico",
+                token_acceso=pedido_encontrado.token_acceso,
+            )
 
         messages.error(request, "No encontramos un pedido con ese código y correo.")
         return render(
@@ -195,10 +198,10 @@ def consultar_pedido(request):
     )
 
 
-def detalle_publico(request, pedido_id):
+def detalle_publico(request, token_acceso):
     pedido = get_object_or_404(
         Pedido.objects.prefetch_related("lineas"),
-        pk=pedido_id,
+        token_acceso=token_acceso,
     )
 
     return render(
@@ -300,11 +303,11 @@ def confirmar_pedido(request):
         carrito.limpiar()
         request.session.modified = True
 
-    return redirect("pedidos:exito", pedido_id=pedido.id)
+    return redirect("pedidos:exito", token_acceso=pedido.token_acceso)
 
 
-def exito(request, pedido_id):
-    pedido = get_object_or_404(Pedido, pk=pedido_id)
+def exito(request, token_acceso):
+    pedido = get_object_or_404(Pedido, token_acceso=token_acceso)
 
     logger.debug(
         "PEDIDO EN VISTA EXITO: id=%s codigo=%s fecha_evento=%s detalles=%s tipo_fecha_evento=%s",
@@ -318,8 +321,11 @@ def exito(request, pedido_id):
     return render(request, "pedidos/exito.html", {"pedido": pedido})
 
 
-def descargar_pdf(request, pedido_id):
-    pedido = get_object_or_404(Pedido.objects.prefetch_related("lineas"), pk=pedido_id)
+def descargar_pdf(request, token_acceso):
+    pedido = get_object_or_404(
+        Pedido.objects.prefetch_related("lineas"),
+        token_acceso=token_acceso,
+    )
 
     response = HttpResponse(content_type="application/pdf")
     codigo_factura = pedido.codigo_pedido

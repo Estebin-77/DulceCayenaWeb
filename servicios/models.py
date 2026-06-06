@@ -24,10 +24,17 @@ class Servicio(models.Model):
 
 
 class SolicitudServicio(models.Model):
+    servicio = models.ForeignKey(
+        Servicio,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="solicitudes",
+    )
     nombre = models.CharField(max_length=120)
     email = models.EmailField()
     telefono = models.CharField(max_length=30, blank=True)
-    tipo_servicio = models.CharField(max_length=150)  # “Catering dulce para empresas”, etc.
+    tipo_servicio = models.CharField(max_length=150, blank=True)
     fecha_evento = models.DateField(null=True, blank=True)
     detalles = models.TextField(blank=True)
     creado = models.DateTimeField(auto_now_add=True)
@@ -37,5 +44,10 @@ class SolicitudServicio(models.Model):
 
     def __str__(self):
         return f"{self.nombre} — {self.tipo_servicio} ({self.creado:%Y-%m-%d})"
+
+    def save(self, *args, **kwargs):
+        if self.servicio and not self.tipo_servicio:
+            self.tipo_servicio = self.servicio.titulo
+        super().save(*args, **kwargs)
 
 

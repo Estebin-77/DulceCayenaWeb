@@ -10,6 +10,6 @@ class ServicioAdmin(admin.ModelAdmin):
 
 @admin.register(SolicitudServicio)
 class SolicitudServicioAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'tipo_servicio', 'fecha_evento', 'email', 'creado')
-    list_filter = ('tipo_servicio', 'fecha_evento', 'creado')
-    search_fields = ('nombre', 'email', 'telefono', 'tipo_servicio', 'detalles')
+    list_display = ('nombre', 'servicio', 'tipo_servicio', 'fecha_evento', 'email', 'creado')
+    list_filter = ('servicio', 'fecha_evento', 'creado')
+    search_fields = ('nombre', 'email', 'telefono', 'tipo_servicio', 'servicio__titulo', 'detalles')

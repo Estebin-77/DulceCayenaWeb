@@ -38,6 +38,7 @@ def solicitar_servicio(request, slug):
     # ✅ Guardar la solicitud
     solicitud: SolicitudServicio = form.save(commit=False)
     solicitud.servicio = servicio
+    solicitud.tipo_servicio = servicio.titulo
     solicitud.save()
 
     # (Opcional) mensaje flash si luego quieres volver al detalle en vez de “gracias”
