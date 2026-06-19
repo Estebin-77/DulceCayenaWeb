@@ -77,6 +77,14 @@ Migraciones:
 
 python manage.py migrate  
 
+Cargar productos demo para una base de datos nueva:
+
+python manage.py cargar_productos_demo  
+
+Cargar servicios demo:
+
+python manage.py cargar_servicios_demo  
+
 Ejecutar servidor:
 
 python manage.py runserver  
