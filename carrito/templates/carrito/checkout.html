@@ -76,7 +76,10 @@
           </div>
 
           <div class="d-flex flex-wrap gap-2 justify-content-between">
-            <a href="{% url 'carrito:limpiar_carrito' %}" class="btn btn-outline-danger">Vaciar Carrito</a>
+            <form method="post" action="{% url 'carrito:limpiar_carrito' %}" id="formVaciarCheckout" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger">Vaciar Carrito</button>
+            </form>
 
             <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-secondary">Seguir Ordenando</a>
 
@@ -179,16 +182,19 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const btnVaciar = document.querySelector(".btn-outline-danger[href*='limpiar']");
-  if (!btnVaciar) return;
+  const formVaciar = document.getElementById("formVaciarCheckout");
+  if (!formVaciar) return;
 
-  btnVaciar.addEventListener("click", function(e) {
+  formVaciar.addEventListener("submit", function(e) {
     e.preventDefault();
-    const url = this.getAttribute("href");
 
-    fetch(url, {
-      method: "GET",
-      headers: { "X-Requested-With": "XMLHttpRequest" }
+    fetch(formVaciar.action, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": window.DulceCayena.getCsrfToken()
+      }
     })
     .then(res => res.json())
     .then(data => {
@@ -209,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(() => {
       // fallback seguro si AJAX falla
-      window.location.href = url;
+      formVaciar.submit();
     });
   });
 });

@@ -9,10 +9,24 @@ window.DulceCayenaCarrito = (() => {
     setTimeout(() => t.remove(), 2500);
   }
 
+  function getCsrfToken() {
+    return window.DulceCayena?.getCsrfToken?.() || "";
+  }
+
   async function hit(url) {
     const res = await fetch(url, {
-      headers: { "X-Requested-With": "XMLHttpRequest" }
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCsrfToken()
+      }
     });
+
+    if (!res.ok) {
+      throw new Error(`Error al actualizar carrito: ${res.status}`);
+    }
+
     window.dispatchEvent(new Event("carrito-actualizado"));
     return res;
   }

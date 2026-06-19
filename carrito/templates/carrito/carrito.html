@@ -28,14 +28,23 @@
             <td class="text-center">{{ item.precio|moneda }}</td>
             <td class="text-center">
               <div class="d-inline-flex align-items-center gap-2">
-                <a href="{% url 'carrito:restar_producto' item.producto_id %}" class="btn btn-sm btn-outline-secondary">-</a>
+                <form method="post" action="{% url 'carrito:restar_producto' item.producto_id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                </form>
                 <span class="mx-1 fw-semibold">{{ item.cantidad }}</span>
-                <a href="{% url 'carrito:agregar_al_carrito' item.producto_id %}" class="btn btn-sm btn-outline-secondary">+</a>
+                <form method="post" action="{% url 'carrito:agregar_al_carrito' item.producto_id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                </form>
               </div>
             </td>
             <td class="text-end">{{ item.cantidad|multiply:item.precio|moneda }}</td>
             <td class="text-center">
-              <a href="{% url 'carrito:eliminar_producto' key %}" class="btn btn-sm btn-danger">🗑️</a>
+              <form method="post" action="{% url 'carrito:eliminar_producto' key %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+              </form>
             </td>
           </tr>
           {% endfor %}
@@ -52,9 +61,12 @@
 
     <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
       <a href="{% url 'tienda:tienda' %}" class="btn btn-outline-secondary">Seguir Ordenando</a>
-      <button type="button" id="btnVaciar" class="btn btn-outline-danger">
-  Vaciar Carrito
-</button>
+      <form method="post" action="{% url 'carrito:limpiar_carrito' %}" id="formVaciar" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" id="btnVaciar" class="btn btn-outline-danger">
+          Vaciar Carrito
+        </button>
+      </form>
       <a href="{% url 'carrito:checkout' %}" class="btn text-white" style="background-color:#ff8c42;">Realizar pedido</a>
     </div>
 
@@ -66,9 +78,17 @@
   {% endif %}
 </section>
 <script>
-document.getElementById("btnVaciar").addEventListener("click", async () => {
-  const res = await fetch("{% url 'carrito:limpiar_carrito' %}", {
-    headers: {'X-Requested-With': 'XMLHttpRequest'}
+document.getElementById("formVaciar")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const res = await fetch(form.action, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": window.DulceCayena.getCsrfToken()
+    }
   });
 
   // ✅ Si vacío correctamente → mostrar vista carrito vacío sin salir del carrito

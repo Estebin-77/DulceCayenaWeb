@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
-from django.urls import reverse
-from pedidos.forms import PedidoClienteForm
+from django.views.decorators.http import require_POST
 from tienda.models import Producto
 from .carrito import Carrito
 
@@ -10,6 +9,7 @@ def es_ajax(request):
     return request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
 
+@require_POST
 def agregar_al_carrito(request, producto_id):
     carrito = Carrito(request)
     producto = get_object_or_404(Producto, id=producto_id)
@@ -21,6 +21,7 @@ def agregar_al_carrito(request, producto_id):
     # ✅ Volver a la misma URL desde donde se llamó
     return redirect(request.META.get("HTTP_REFERER", "carrito:ver_carrito"))
 
+@require_POST
 def restar_producto(request, producto_id):
     carrito = Carrito(request)
     producto = get_object_or_404(Producto, id=producto_id)
@@ -32,6 +33,7 @@ def restar_producto(request, producto_id):
     return redirect(request.META.get("HTTP_REFERER", "carrito:ver_carrito"))
 
 
+@require_POST
 def eliminar_producto(request, producto_id):
     carrito = Carrito(request)
     producto = get_object_or_404(Producto, id=producto_id)
@@ -44,6 +46,7 @@ def eliminar_producto(request, producto_id):
 
 
 
+@require_POST
 def limpiar_carrito(request):
     carrito = Carrito(request)
     carrito.limpiar()
@@ -51,7 +54,7 @@ def limpiar_carrito(request):
     if es_ajax(request):
         return JsonResponse({"ok": True})
 
-    return redirect("tienda:tienda")
+    return redirect("carrito:ver_carrito")
 
 
 def ver_carrito(request):
